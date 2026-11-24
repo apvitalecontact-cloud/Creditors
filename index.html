@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Supplier Ledger</title>
+<style>
+:root{--bg:#f3f5f4;--card:#fff;--ink:#16211f;--mut:#66756f;--line:#dde4e1;--acc:#0e7c7b;--on:#fff;--warn:#c2410c;--row:#f7faf9;--in:#fff;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121817;--card:#1a2321;--ink:#e8efed;--mut:#8fa09a;--line:#2a3633;--acc:#4fb3b1;--on:#0b1a19;--warn:#ff8a5c;--row:#1e2a27;--in:#121a19;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121817;--card:#1a2321;--ink:#e8efed;--mut:#8fa09a;--line:#2a3633;--acc:#4fb3b1;--on:#0b1a19;--warn:#ff8a5c;--row:#1e2a27;--in:#121a19;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line);background:var(--card)}
+h1{font-size:18px;margin:0 12px 0 0}
+.tabs{display:flex;gap:6px}
+.tab,button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--in);color:var(--ink);padding:7px 12px;border-radius:6px}
+.tab.on,button.pri{background:var(--acc);color:var(--on);border-color:var(--acc);font-weight:600}
+button.del{color:var(--warn)}
+.sp{flex:1}
+main{display:grid;grid-template-columns:270px 1fr;gap:16px;padding:16px 20px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px}
+.item{display:flex;justify-content:space-between;gap:8px;padding:9px 10px;border:1px solid var(--line);border-radius:6px;margin-bottom:7px;cursor:pointer;background:var(--in)}
+.item.on{border-color:var(--acc);box-shadow:inset 3px 0 0 var(--acc)}
+.item b{text-align:right;font-weight:600;font-size:13px}
+.item small{display:block;color:var(--mut)}
+input,select{font:inherit;color:var(--ink);background:var(--in);border:1px solid var(--line);border-radius:6px;padding:8px;width:100%;min-width:0}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+label{display:block;color:var(--mut);font-size:12px;margin-bottom:3px}
+.add{display:flex;gap:6px;margin-top:10px}
+.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start;margin-bottom:12px}
+.name{font-size:20px;font-weight:700;max-width:300px}
+.big{text-align:right}.big div{font-size:22px;font-weight:700;color:var(--warn)}.big div.z{color:var(--acc)}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;align-items:end}
+.po{display:block}.form.np .po{display:none}
+.pre{color:var(--mut);margin:8px 0 0}
+.msg{color:var(--warn);margin:6px 0 0;min-height:18px}
+.wrap{overflow-x:auto;margin-top:14px}
+table{border-collapse:collapse;width:100%;min-width:760px}
+th{color:var(--mut);font-weight:600;font-size:12px;text-align:left;padding:8px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+tr.pay td{background:var(--row)}
+.r{text-align:right}.mut{color:var(--mut)}
+td button{padding:3px 8px;font-size:12px}
+h3{margin:18px 0 6px;font-size:15px}
+.empty{color:var(--mut);padding:18px 4px}
+[hidden]{display:none!important}
+.cb{position:relative}.cb::after{content:"▾";position:absolute;right:9px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--mut)}
+.dd{position:absolute;z-index:20;left:0;right:0;top:100%;margin-top:2px;min-width:170px;max-height:220px;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:6px;box-shadow:0 8px 22px rgba(0,0,0,.2)}
+.dd .o{padding:8px 10px;cursor:pointer}.dd .o:hover{background:var(--row)}.dd .nw{color:var(--acc);font-weight:600}
+h2.t{margin:0;font-size:20px}
+@media(max-width:760px){main{grid-template-columns:1fr}}
+</style></head><body>
+<header><h1>Supplier Ledger</h1>
+<div class="tabs"><button class="tab on" id="t1" onclick="go(1)">Suppliers</button><button class="tab" id="t2" onclick="go(2)">Purchases by category</button></div>
+<span class="sp"></span>
+<button onclick="exp()">Export backup</button><button onclick="document.getElementById('imp').click()">Import backup</button>
+<input type="file" id="imp" accept=".json" hidden onchange="imp(this)">
+</header>
+<main id="p1">
+<div class="card"><div id="sl"></div><div class="add"><input id="ns" placeholder="New supplier name" onkeydown="if(event.key==='Enter')addSup()"><button class="pri" onclick="addSup()">Add</button></div></div>
+<div class="card" id="sr"></div>
+</main>
+<main id="p2" hidden>
+<div class="card"><div id="cl"></div><div class="add"><input id="nc" placeholder="New category name" onkeydown="if(event.key==='Enter')addCat()"><button class="pri" onclick="addCat()">Add</button></div></div>
+<div class="card" id="cr"></div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const KEY='supplier-ledger-v1';
+const SUPABASE_URL='https://tylwxpuarmkdbrhgiztb.supabase.co';
+const SUPABASE_KEY='sb_publishable_B6j8kX4ZSa55zidjzQPsqw_Yr9Pn34e';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+let S=null;
+let localSaved=false;
+try{S=JSON.parse(localStorage.getItem(KEY));localSaved=!!(S&&S.suppliers&&S.entries)}catch(e){}
+
+const defaultState=()=>({
+  suppliers:[1,2,3,4,5].map(i=>({id:'s'+i,name:'Supplier '+i})),
+  cats:['Raw Material','Assets'],
+  units:['PCS','CTN','KG','LTR'],
+  curs:['XOF','USD','EUR'],
+  entries:[],
+  sel:'s1',
+  csel:'Raw Material'
+});
+if(!S||!S.suppliers)S=defaultState();
+
+let writeTimer=null;
+let remoteReady=false;
+let applyingRemote=false;
+
+function normalizeState(){
+  S.cats=S.cats||[];
+  S.units=S.units||['PCS','CTN','KG','LTR'];
+  S.curs=(S.curs||[]).map(c=>c==='XOF'?'CFA':c);
+  S.entries=S.entries||[];
+  S.entries.forEach(e=>{if(e.cur==='XOF')e.cur='CFA'});
+  ['CFA','USD','EUR','AED'].forEach(c=>{if(!S.curs.includes(c))S.curs.push(c)});
+  if(S.sel&&!S.suppliers.some(s=>s.id===S.sel))S.sel=S.suppliers[0]?.id||null;
+  if(!S.suppliers.length)S.sel=null;
+  S.csel='';
+}
+
+const save=()=>{
+  try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
+  if(!remoteReady||applyingRemote)return;
+  clearTimeout(writeTimer);
+  writeTimer=setTimeout(async()=>{
+    writeTimer=null;
+    const snapshot=JSON.parse(JSON.stringify(S));
+    const {error}=await sb.from('supplier_ledger_state').upsert({
+      id:1,data:snapshot,updated_at:new Date().toISOString()
+    });
+    if(error)console.error('Shared ledger save failed:',error);
+  },350);
+};
+
+async function initShared(){
+  try{
+    const {data,error}=await sb.from('supplier_ledger_state')
+      .select('data').eq('id',1).single();
+    if(error)throw error;
+
+    const remote=data&&data.data;
+    if(remote&&Array.isArray(remote.suppliers)&&Array.isArray(remote.entries)){
+      S=remote;
+    }else if(!localSaved){
+      S=defaultState();
+    }
+
+    normalizeState();
+    remoteReady=true;
+    try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
+
+    if(!remote||!Array.isArray(remote.suppliers)||!Array.isArray(remote.entries)){
+      const {error:seedError}=await sb.from('supplier_ledger_state').upsert({
+        id:1,data:S,updated_at:new Date().toISOString()
+      });
+      if(seedError)throw seedError;
+    }
+
+    go(1);
+
+    sb.channel('supplier-ledger-live')
+      .on('postgres_changes',{
+        event:'*',schema:'public',table:'supplier_ledger_state',filter:'id=eq.1'
+      },payload=>{
+        const incoming=payload.new&&payload.new.data;
+        if(!incoming||!Array.isArray(incoming.suppliers)||!Array.isArray(incoming.entries))return;
+        if(writeTimer)return;
+        if(JSON.stringify(incoming)===JSON.stringify(S))return;
+        applyingRemote=true;
+        S=incoming;
+        normalizeState();
+        try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
+        applyingRemote=false;
+        if(page===1){
+          if(hasForm){renderSupList();renderLedger()}else{renderSup()}
+        }else{renderCat()}
+      })
+      .subscribe();
+  }catch(error){
+    console.error('Shared ledger connection failed:',error);
+    normalizeState();
+    go(1);
+    alert('Could not connect to the shared ledger. Check your Supabase table permissions and internet connection. Details are in the browser console.');
+  }
+};
+
+const $=id=>document.getElementById(id);
+const uid=()=>Math.random().toString(36).slice(2,9);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=n=>Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fd=d=>d?d.split('-').reverse().join('-'):'';
+const TL={purchase:'Purchase',payment:'Payment',debitadj:'Debit Adjustment',creditadj:'Credit Adjustment'};
+const isDr=e=>e.type==='purchase'||e.type==='debitadj';
+let editId=null,page=1,hasForm=false;
+function arm(b,fn){if(b.dataset.a){fn();return}b.dataset.a=1;const t=b.textContent;b.textContent='Click again to confirm';setTimeout(()=>{delete b.dataset.a;b.textContent=t},3000)}
+function sums(list,f){const o={};list.forEach(e=>{o[e.cur]=(o[e.cur]||0)+f(e)});return o}
+function cs(o,empty){const k=Object.keys(o).filter(c=>Math.abs(o[c])>0.004);return k.length?k.map(c=>c+' '+fmt(o[c])).join('<br>'):(empty||'0.00')}
+function bal(sid){return sums(S.entries.filter(e=>e.sid===sid),e=>isDr(e)?e.amount:-e.amount)}
+function ensure(list,v){v=(v||'').trim();if(v&&!list.some(x=>x.toLowerCase()===v.toLowerCase()))list.push(v);return v}
+function go(n){page=n;$('p1').hidden=n!==1;$('p2').hidden=n!==2;$('t1').classList.toggle('on',n===1);$('t2').classList.toggle('on',n===2);n===1?renderSup():renderCat()}
+function lists(){}
+const OPTS={cat:()=>S.cats,unit:()=>S.units,cur:()=>S.curs,prod:()=>[...new Set(S.entries.map(e=>e.prod).filter(Boolean))]};
+const NEWL={cat:'category',unit:'unit',cur:'currency',prod:'product'};
+const NEWT={cat:'New Category',unit:'New Unit',prod:'New Product',cur:'New Currency'};
+const FID={cat:'fcat',unit:'funit',prod:'fprod',cur:'fcur'};
+function val(id){const s=$(id);return s.value==='__new'?$(id+'_n').value.trim():s.value}
+function fopts(k){
+  if(k==='prod'){const c=val('fcat').toLowerCase();return c?[...new Set(S.entries.filter(e=>e.type==='purchase'&&e.prod&&(e.cat||'').toLowerCase()===c).map(e=>e.prod))]:[]}
+  return OPTS[k]()
+}
+function fill(k){
+  const s=$(FID[k]),n=$(FID[k]+'_n');
+  s.innerHTML=(k==='cur'?'':`<option value="" hidden selected>Select ${NEWL[k]}</option>`)+`<option value="__new">${NEWT[k]}</option>`+fopts(k).map(o=>`<option value="${esc(o)}">${esc(o)}</option>`).join('');
+  n.hidden=true;n.value='';s.value=k==='cur'?'CFA':''
+}
+function setv(k,v){fill(k);const s=$(FID[k]);if(v&&![...s.options].some(o=>o.value===v))s.add(new Option(v,v));s.value=v||(k==='cur'?'CFA':'')}
+function selChg(s){const n=$(s.id+'_n');n.hidden=s.value!=='__new';if(!n.hidden)n.focus();if(s.id==='fcat')fill('prod');if(s.id==='fcur')pv()}
+
+/* ---------- Suppliers ---------- */
+function addSup(){const n=$('ns').value.trim();if(!n)return;const id='s'+uid();S.suppliers.push({id,name:n});S.sel=id;$('ns').value='';save();hasForm=false;renderSup()}
+function pick(id){S.sel=id;editId=null;hasForm=false;save();renderSup()}
+function renameSup(v){const s=S.suppliers.find(x=>x.id===S.sel);if(s&&v.trim()){s.name=v.trim();save();renderSupList()}}
+function delSup(){S.entries=S.entries.filter(e=>e.sid!==S.sel);S.suppliers=S.suppliers.filter(s=>s.id!==S.sel);S.sel=S.suppliers[0]?S.suppliers[0].id:null;save();hasForm=false;renderSup()}
+function renderSupList(){$('sl').innerHTML=S.suppliers.map(s=>`<div class="item ${s.id===S.sel?'on':''}" onclick="pick('${s.id}')"><span>${esc(s.name)}</span><b>${cs(bal(s.id))}</b></div>`).join('')||'<div class="empty">No suppliers yet.</div>';const b=$('bal');if(b){const x=bal(S.sel);b.innerHTML=cs(x);b.className=Object.keys(x).some(c=>Math.abs(x[c])>0.004)?'':'z'}}
+function renderSup(){
+  lists();renderSupList();
+  const s=S.suppliers.find(x=>x.id===S.sel);
+  if(!s){$('sr').innerHTML='<div class="empty">Add a supplier on the left to begin.</div>';return}
+  if(!hasForm){
+    $('sr').innerHTML=`<div class="top"><div><input class="name" id="sn" value="${esc(s.name)}" onchange="renameSup(this.value)" aria-label="Supplier name"> <button class="del" onclick="arm(this,delSup)">Delete supplier</button></div><div class="big"><span class="mut">Balance owed</span><div id="bal"></div></div></div>
+<div class="form" id="f">
+<div><label>Date</label><input type="date" id="fdte"></div>
+<div><label>Entry type</label><select id="ftype" onchange="typ()"><option value="purchase">Purchase</option><option value="payment">Payment</option><option value="debitadj">Debit Adjustment</option><option value="creditadj">Credit Adjustment</option></select></div>
+<div><label>Invoice / reference</label><input id="finv"></div>
+<div class="po"><label>Category</label><select id="fcat" onchange="selChg(this)"></select><input id="fcat_n" hidden placeholder="Type new category" style="margin-top:6px"></div>
+<div class="po"><label>Product</label><select id="fprod" onchange="selChg(this)"></select><input id="fprod_n" hidden placeholder="Type new product" style="margin-top:6px"></div>
+<div class="po"><label>Quantity</label><input type="number" id="fqty" min="0" step="any" oninput="pv()"></div>
+<div class="po"><label>Unit</label><select id="funit" onchange="selChg(this)"></select><input id="funit_n" hidden placeholder="Type new unit" style="margin-top:6px"></div>
+<div class="po"><label>Price before TVA</label><input type="number" id="fprice" min="0" step="any" oninput="pv()"></div>
+<div class="po"><label>TVA %</label><input type="number" id="ftva" value="18" min="0" step="any" oninput="pv()"></div>
+<div><label>Currency</label><select id="fcur" onchange="selChg(this)"></select><input id="fcur_n" hidden placeholder="Type new currency" oninput="pv()" style="margin-top:6px"></div>
+<div class="pa"><label>Amount</label><input type="number" id="famt" min="0" step="any"></div>
+<div style="display:flex;gap:6px"><button class="pri" id="fsave" onclick="saveEntry()">Save entry</button><button id="fcancel" onclick="cancelEdit()" hidden>Cancel</button></div>
+</div><p class="pre" id="pre"></p><p class="msg" id="msg"></p>
+<div class="wrap" id="led"></div>`;
+    hasForm=true;['cat','unit','prod','cur'].forEach(fill);$('fdte').value=new Date().toISOString().slice(0,10);typ();renderBal()
+  }
+  renderLedger();renderSupList()
+}
+function renderBal(){}
+function typ(){const p=$('ftype').value==='purchase';$('f').classList.toggle('np',!p);document.querySelector('.pa').style.display=p?'none':'block';pv()}
+function pv(){const el=$('pre');if($('ftype').value!=='purchase'){el.textContent='';return}const q=+$('fqty').value||0,p=+$('fprice').value||0,t=+$('ftva').value||0,sub=q*p;el.textContent=`Subtotal ${fmt(sub)} + TVA ${fmt(sub*t/100)} = ${fmt(sub*(1+t/100))} ${val('fcur')}`}
+function saveEntry(){
+  const g=id=>$(id).value,type=g('ftype'),m=$('msg');m.textContent='';
+  const e={id:editId||uid(),sid:S.sel,date:g('fdte'),type,inv:g('finv').trim(),cur:ensure(S.curs,val('fcur').toUpperCase())||'CFA'};
+  if(!e.date){m.textContent='Choose a date.';return}
+  if(type==='purchase'){
+    e.cat=ensure(S.cats,val('fcat'));e.prod=val('fprod');e.qty=+g('fqty');e.unit=ensure(S.units,val('funit'));e.price=+g('fprice');e.tvaPct=+g('ftva')||0;
+    if(!(e.qty>0)||!(e.price>=0)||g('fprice')===''){m.textContent='Enter quantity and price.';return}
+    e.sub=e.qty*e.price;e.tva=e.sub*e.tvaPct/100;e.amount=e.sub+e.tva
+  }else{e.amount=+g('famt');if(!(e.amount>0)){m.textContent='Enter an amount.';return}}
+  const i=S.entries.findIndex(x=>x.id===e.id);i>=0?S.entries[i]=e:S.entries.push(e);
+  save();editId=null;hasForm=false;renderSup();
+  $('ftype').value=type;typ()
+}
+function editEntry(id){const e=S.entries.find(x=>x.id===id);if(!e)return;editId=id;
+  $('fdte').value=e.date;$('ftype').value=e.type;$('finv').value=e.inv||'';setv('cur',e.cur);typ();
+  if(e.type==='purchase'){setv('cat',e.cat);setv('prod',e.prod);$('fqty').value=e.qty;setv('unit',e.unit);$('fprice').value=e.price;$('ftva').value=e.tvaPct;pv()}else $('famt').value=e.amount;
+  $('fsave').textContent='Update entry';$('fcancel').hidden=false;$('f').scrollIntoView({block:'nearest'})}
+function cancelEdit(){editId=null;hasForm=false;renderSup()}
+function delEntry(id){S.entries=S.entries.filter(e=>e.id!==id);save();renderSup2()}
+function renderSup2(){renderLedger();renderSupList()}
+function renderLedger(){
+  const list=S.entries.map((e,i)=>({e,i})).filter(x=>x.e.sid===S.sel).sort((a,b)=>a.e.date<b.e.date?-1:a.e.date>b.e.date?1:a.i-b.i).map(x=>x.e);
+  const run={};
+  const rows=list.map(e=>{run[e.cur]=(run[e.cur]||0)+(isDr(e)?e.amount:-e.amount);const p=e.type==='purchase',d=isDr(e);
+    return `<tr class="${p?'':'pay'}"><td>${fd(e.date)}</td><td>${TL[e.type]}</td><td>${esc(e.inv)}</td><td>${esc(e.cat)}</td><td>${esc(e.prod)}</td><td class="r">${p?fmt(e.qty).replace(/\.00$/,'')+' '+esc(e.unit):''}</td><td>${esc(e.cur)}</td><td class="r">${p?fmt(e.price):''}</td><td class="r">${p?fmt(e.tva):''}</td><td class="r">${d?fmt(e.amount):''}</td><td class="r">${d?'':fmt(e.amount)}</td><td class="r"><b>${fmt(run[e.cur])}</b></td><td><button onclick="editEntry('${e.id}')">Edit</button> <button class="del" onclick="arm(this,()=>delEntry('${e.id}'))">Delete</button></td></tr>`}).join('');
+  $('led').innerHTML=list.length?`<table><thead><tr><th>Date</th><th>Type</th><th>Invoice / ref</th><th>Category</th><th>Product</th><th class="r">Qty</th><th>Cur</th><th class="r">Price</th><th class="r">TVA</th><th class="r">Debit</th><th class="r">Payment / credit</th><th class="r">Balance</th><th></th></tr></thead><tbody>${rows}</tbody></table>`:'<div class="empty">No entries yet. Fill the form above and save the first one.</div>';
+  const b=$('bal');if(b){const x=bal(S.sel);b.innerHTML=cs(x);b.className=Object.keys(x).some(c=>Math.abs(x[c])>0.004)?'':'z'}
+}
+
+/* ---------- Categories ---------- */
+const purch=c=>S.entries.filter(e=>e.type==='purchase'&&e.cat===c);
+function addCat(){const n=ensure(S.cats,$('nc').value);if(!n)return;S.csel=n;$('nc').value='';save();renderCat()}
+function pickCat(c){S.csel=c;save();renderCat()}
+function renameCat(v){v=v.trim();const o=S.csel;if(!v||v===o)return;if(S.cats.some(x=>x.toLowerCase()===v.toLowerCase()&&x!==o)){renderCat();return}
+  S.cats=S.cats.map(c=>c===o?v:c);S.entries.forEach(e=>{if(e.cat===o)e.cat=v});S.csel=v;save();renderCat()}
+function delCat(){const o=S.csel;S.cats=S.cats.filter(c=>c!==o);S.entries.forEach(e=>{if(e.cat===o)e.cat=''});S.csel='';save();renderCat()}
+function renderCat(){
+  if(S.csel&&!S.cats.includes(S.csel))S.csel='';
+  const c=S.csel,fs=window.cf||'';
+  const allP=S.entries.filter(e=>e.type==='purchase'),all=c?purch(c):allP,list=all.filter(e=>!fs||e.sid===fs);
+  const sn=id=>(S.suppliers.find(s=>s.id===id)||{name:'(deleted)'}).name;
+  const tot=l=>cs(sums(l,e=>e.amount));
+  $('cl').innerHTML=`<div class="item ${!c?'on':''}" onclick="pickCat('')"><span>All Categories</span><b>${tot(allP)}</b></div>`+S.cats.map(k=>`<div class="item ${k===c?'on':''}" onclick="pickCat(this.dataset.c)" data-c="${esc(k)}"><span>${esc(k)}</span><b>${tot(purch(k))}</b></div>`).join('');
+  const by=S.suppliers.map(s=>({s,t:sums(all.filter(e=>e.sid===s.id),e=>e.amount)})).filter(x=>Object.keys(x.t).length);
+  const g={};
+  list.forEach(e=>{const k=[e.sid,(e.cat||'').toLowerCase(),(e.prod||'').toLowerCase(),(e.unit||'').toLowerCase(),e.price,e.cur].join('|');const r=g[k]||(g[k]={e,qty:0,tva:0,amt:0,n:0});r.qty+=e.qty;r.tva+=e.tva;r.amt+=e.amount;r.n++});
+  const rows=Object.values(g).sort((a,b)=>sn(a.e.sid).localeCompare(sn(b.e.sid))||(a.e.cat||'').localeCompare(b.e.cat||'')||(a.e.prod||'').localeCompare(b.e.prod||''));
+  const sorted=rows;
+  $('cr').innerHTML=`<div class="top"><div>${c?`<input class="name" value="${esc(c)}" onchange="renameCat(this.value)" aria-label="Category name"> <button class="del" onclick="arm(this,delCat)">Delete category</button>`:'<h2 class="t">All Categories</h2>'}</div><div class="big"><span class="mut">Total purchased (incl. TVA)</span><div>${tot(all)}</div></div></div>
+<label>Show supplier</label><select onchange="window.cf=this.value;renderCat()"><option value="">All suppliers</option>${S.suppliers.map(s=>`<option value="${s.id}" ${s.id===fs?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
+${by.length?`<h3>Total by supplier</h3><div class="wrap" style="margin-top:0"><table style="min-width:0">${by.map(x=>`<tr><td>${esc(x.s.name)}</td><td class="r">${cs(x.t)}</td></tr>`).join('')}<tr><td><b>All suppliers</b></td><td class="r"><b>${tot(all)}</b></td></tr></table></div>`:''}
+<h3>Purchases</h3><div class="wrap" style="margin-top:0">${sorted.length?`<table><thead><tr><th>Supplier</th><th>Category</th><th>Product</th><th class="r">Qty</th><th>Unit</th><th>Cur</th><th class="r">Price</th><th class="r">TVA</th><th class="r">Total with TVA</th></tr></thead><tbody>${sorted.map(r=>{const e=r.e;return `<tr><td>${esc(sn(e.sid))}</td><td>${esc(e.cat)}</td><td>${esc(e.prod)}${r.n>1?` <span class="mut">(${r.n} entries)</span>`:''}</td><td class="r">${fmt(r.qty).replace(/\.00$/,'')}</td><td>${esc(e.unit)}</td><td>${esc(e.cur)}</td><td class="r">${fmt(e.price)}</td><td class="r">${fmt(r.tva)}</td><td class="r"><b>${fmt(r.amt)}</b></td></tr>`}).join('')}</tbody></table>`:'<div class="empty">No purchases to show.</div>'}</div>`
+}
+
+/* ---------- Backup ---------- */
+function exp(){const a=document.createElement('a');a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(S));a.download='supplier-ledger-backup.json';a.click()}
+function imp(i){const f=i.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.suppliers||!d.entries)throw 0;S=d;normalizeState();save();hasForm=false;go(page)}catch(e){alert('That file is not a valid backup.')}};r.readAsText(f)}
+initShared();
+</script></body></html>
