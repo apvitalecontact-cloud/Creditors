@@ -45,7 +45,7 @@ h3{margin:18px 0 6px;font-size:15px}
 [hidden]{display:none!important}
 .cb{position:relative}.cb::after{content:"▾";position:absolute;right:9px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--mut)}
 .dd{position:absolute;z-index:20;left:0;right:0;top:100%;margin-top:2px;min-width:170px;max-height:220px;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:6px;box-shadow:0 8px 22px rgba(0,0,0,.2)}
-.dd .o{padding:8px 10px;cursor:pointer}.dd .o:hover{background:var(--row)}.dd .nw{color:var(--acc);font-weight:600}.search-select{position:relative}.search-select input{width:100%}.search-select .dd{display:none}.search-select.open .dd{display:block}.search-select .dd .empty-option{padding:9px 10px;color:var(--mut)}.filter-search{margin:8px 0 10px}.filter-search input{max-width:100%}
+.dd .o{padding:8px 10px;cursor:pointer}.dd .o:hover{background:var(--row)}.dd .nw{color:var(--acc);font-weight:600}.search-select{position:relative}.search-select input{width:100%}.search-select .dd{display:none}.search-select.open .dd{display:block}.search-select .dd .empty-option{padding:9px 10px;color:var(--mut)}.filter-search{margin:8px 0 10px}.filter-search input{max-width:100%}.custom-field-cell{min-width:0}.custom-field-head{display:flex;align-items:center;justify-content:space-between;gap:6px}.custom-field-head button{padding:2px 6px;font-size:11px}.custom-field-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px}.custom-field-tools small{color:var(--mut)}
 h2.t{margin:0;font-size:20px}
 @media(max-width:760px){main{grid-template-columns:1fr}}
 </style></head><body>
@@ -78,6 +78,8 @@ const defaultState=()=>({
   suppliers:[1,2,3,4,5].map(i=>({id:'s'+i,name:'Supplier '+i})),
   cats:['Raw Material','Assets'],
   units:['PCS','CTN','KG','LTR'],
+  products:[],
+  customFields:[],
   curs:['XOF','USD','EUR'],
   entries:[],
   sel:'s1',
@@ -92,8 +94,11 @@ let applyingRemote=false;
 function normalizeState(){
   S.cats=S.cats||[];
   S.units=S.units||['PCS','CTN','KG','LTR'];
-  S.curs=(S.curs||[]).map(c=>c==='XOF'?'CFA':c);
+  S.products=S.products||[];
+  S.customFields=S.customFields||[];
   S.entries=S.entries||[];
+  S.entries.forEach(e=>{e.customFields=e.customFields||{}});
+  S.curs=(S.curs||[]).map(c=>c==='XOF'?'CFA':c);
   S.entries.forEach(e=>{if(e.cur==='XOF')e.cur='CFA'});
   ['CFA','USD','EUR','AED'].forEach(c=>{if(!S.curs.includes(c))S.curs.push(c)});
   if(S.sel&&!S.suppliers.some(s=>s.id===S.sel))S.sel=S.suppliers[0]?.id||null;
@@ -182,7 +187,8 @@ function bal(sid){return sums(S.entries.filter(e=>e.sid===sid),e=>isDr(e)?e.amou
 function ensure(list,v){v=(v||'').trim();if(v&&!list.some(x=>x.toLowerCase()===v.toLowerCase()))list.push(v);return v}
 function go(n){page=n;$('p1').hidden=n!==1;$('p2').hidden=n!==2;$('t1').classList.toggle('on',n===1);$('t2').classList.toggle('on',n===2);n===1?renderSup():renderCat()}
 function lists(){}
-const OPTS={cat:()=>S.cats,unit:()=>S.units,cur:()=>S.curs,prod:()=>[...new Set(S.entries.map(e=>e.prod).filter(Boolean))]};
+const OPTS={cat:()=>S.cats,unit:()=>S.units,cur:()=>S.curs,prod:()=>[...new Set([...(S.products||[]),...S.entries.map(e=>e.prod).filter(Boolean)])]};
+function fopts(k){return [...(OPTS[k]?OPTS[k]():[])].filter(Boolean).sort((a,b)=>String(a).localeCompare(String(b),undefined,{sensitivity:'base'}))}
 const NEWL={cat:'category',unit:'unit',cur:'currency',prod:'product'};
 const NEWT={cat:'New Category',unit:'New Unit',prod:'New Product',cur:'New Currency'};
 const FID={cat:'fcat',unit:'funit',prod:'fprod',cur:'fcur'};
@@ -191,17 +197,25 @@ function optionKey(ev,k){if(ev.key==='Enter'){ev.preventDefault();const q=$(`${F
 function searchOptions(k){
   const input=$(`${FID[k]}_search`),box=$(`${FID[k]}_box`),dd=$(`${FID[k]}_dd`);
   if(!input||!box||!dd)return;
-  const q=input.value.trim().toLowerCase(),opts=fopts(k);
+  const raw=input.value.trim(),q=raw.toLowerCase(),opts=fopts(k);
   const matches=opts.filter(x=>String(x).toLowerCase().includes(q));
-  let html=matches.map(x=>`<div class="o" onmousedown="event.preventDefault()" onclick="chooseOption('${k}',decodeURIComponent('${encodeURIComponent(x)}') )">${esc(x)}</div>`).join('');
-  if(q&&!matches.some(x=>String(x).toLowerCase()===q))html+=`<div class="o nw" onmousedown="event.preventDefault()" onclick="chooseOption('${k}',decodeURIComponent('${encodeURIComponent(input.value.trim())}'),true)">＋ New ${NEWT[k].replace(/^New /,'')} “${esc(input.value.trim())}”</div>`;
-  if(!html)html='<div class="empty-option">No matches</div>';
+  let html=`<div class="o nw" onmousedown="event.preventDefault()" onclick="createOptionPrompt('${k}')">＋ New ${NEWT[k]}</div>`;
+  html+=matches.map(x=>`<div class="o" onmousedown="event.preventDefault()" onclick="chooseOption('${k}',decodeURIComponent('${encodeURIComponent(x)}'))">${esc(x)}</div>`).join('');
+  if(q&&!matches.some(x=>String(x).toLowerCase()===q))html+=`<div class="o nw" onmousedown="event.preventDefault()" onclick="chooseOption('${k}',decodeURIComponent('${encodeURIComponent(raw)}'),true)">＋ Add “${esc(raw)}”</div>`;
+  if(!matches.length&&!q)html+='<div class="empty-option">No saved options yet</div>';
   dd.innerHTML=html;box.classList.add('open');
+}
+function createOptionPrompt(k){
+  const label=NEWT[k].replace(/^New /,'');
+  const typed=$(`${FID[k]}_search`).value.trim();
+  const value=prompt(`Enter ${label.toLowerCase()} name:`,typed);
+  if(value&&value.trim())chooseOption(k,value.trim(),true);
 }
 function chooseOption(k,v,isNew=false){
   v=String(v||'').trim();if(!v)return;
   if(k==='cat'&&isNew){ensure(S.cats,v);save()}
   if(k==='unit'&&isNew){ensure(S.units,v);save()}
+  if(k==='prod'&&isNew){ensure(S.products,v);save()}
   if(k==='cur'&&isNew){ensure(S.curs,v.toUpperCase());v=v.toUpperCase();save()}
   if(k==='cur')v=v.toUpperCase();
   const sel=$(FID[k]);
@@ -245,19 +259,35 @@ function renderSup(){
 <div class="po"><label>TVA %</label><input type="number" id="ftva" value="18" min="0" step="any" oninput="pv()"></div>
 <div><label>Currency</label><div class="search-select" id="fcur_box"><input id="fcur_search" placeholder="Search currency..." autocomplete="off" oninput="searchOptions('cur')" onfocus="searchOptions('cur')" onkeydown="optionKey(event,'cur')"><div class="dd" id="fcur_dd"></div><select id="fcur" hidden></select></div></div>
 <div class="pa"><label>Amount</label><input type="number" id="famt" min="0" step="any"></div>
+<div id="customFields" style="display:contents"></div>
+<div class="custom-field-tools"><button type="button" onclick="addCustomField()">＋ Add column</button><small>Extra fields you create will be saved with each entry.</small></div>
 <div style="display:flex;gap:6px"><button class="pri" id="fsave" onclick="saveEntry()">Save entry</button><button id="fcancel" onclick="cancelEdit()" hidden>Cancel</button></div>
 </div><p class="pre" id="pre"></p><p class="msg" id="msg"></p>
 <div class="wrap" id="led"></div>`;
-    hasForm=true;['cat','unit','prod','cur'].forEach(fill);$('fdte').value=new Date().toISOString().slice(0,10);typ();renderBal()
+    hasForm=true;['cat','unit','prod','cur'].forEach(fill);renderCustomFields();$('fdte').value=new Date().toISOString().slice(0,10);typ();renderBal()
   }
   renderLedger();renderSupList()
+}
+function customFieldValues(){const out={};(S.customFields||[]).forEach((name,i)=>{const el=$(`custom_${i}`);out[name]=el?el.value:''});return out}
+function renderCustomFields(values={}){
+  const host=$('customFields');if(!host)return;
+  host.innerHTML=(S.customFields||[]).map((name,i)=>`<div class="custom-field-cell"><div class="custom-field-head"><label for="custom_${i}">${esc(name)}</label><button type="button" class="del" title="Remove this column" onclick="removeCustomField(${i})">Remove</button></div><input id="custom_${i}" value="${esc(values[name]||'')}" placeholder="${esc(name)}"></div>`).join('');
+}
+function addCustomField(){
+  const name=prompt('Enter the new column heading:');if(!name||!name.trim())return;
+  const clean=name.trim();if((S.customFields||[]).some(x=>x.toLowerCase()===clean.toLowerCase())){alert('That column already exists.');return}
+  const values=customFieldValues();S.customFields=S.customFields||[];S.customFields.push(clean);save();renderCustomFields(values);
+}
+function removeCustomField(i){
+  if(!confirm(`Remove the “${S.customFields[i]}” column from the entry form? Existing saved values will be kept in the records.`))return;
+  const values=customFieldValues();S.customFields.splice(i,1);save();renderCustomFields(values);
 }
 function renderBal(){}
 function typ(){const p=$('ftype').value==='purchase';$('f').classList.toggle('np',!p);document.querySelector('.pa').style.display=p?'none':'block';pv()}
 function pv(){const el=$('pre');if($('ftype').value!=='purchase'){el.textContent='';return}const q=+$('fqty').value||0,p=+$('fprice').value||0,t=+$('ftva').value||0,sub=q*p;el.textContent=`Subtotal ${fmt(sub)} + TVA ${fmt(sub*t/100)} = ${fmt(sub*(1+t/100))} ${val('fcur')}`}
 function saveEntry(){
   const g=id=>$(id).value,type=g('ftype'),m=$('msg');m.textContent='';
-  const e={id:editId||uid(),sid:S.sel,date:g('fdte'),type,inv:g('finv').trim(),cur:ensure(S.curs,val('fcur').toUpperCase())||'CFA'};
+  const e={id:editId||uid(),sid:S.sel,date:g('fdte'),type,inv:g('finv').trim(),cur:ensure(S.curs,val('fcur').toUpperCase())||'CFA',customFields:customFieldValues()};
   if(!e.date){m.textContent='Choose a date.';return}
   if(type==='purchase'){
     e.cat=ensure(S.cats,val('fcat'));e.prod=val('fprod');e.qty=+g('fqty');e.unit=ensure(S.units,val('funit'));e.price=+g('fprice');e.tvaPct=+g('ftva')||0;
@@ -269,7 +299,7 @@ function saveEntry(){
   $('ftype').value=type;typ()
 }
 function editEntry(id){const e=S.entries.find(x=>x.id===id);if(!e)return;editId=id;
-  $('fdte').value=e.date;$('ftype').value=e.type;$('finv').value=e.inv||'';setv('cur',e.cur);typ();
+  $('fdte').value=e.date;$('ftype').value=e.type;$('finv').value=e.inv||'';setv('cur',e.cur);renderCustomFields(e.customFields||{});typ();
   if(e.type==='purchase'){setv('cat',e.cat);setv('prod',e.prod);$('fqty').value=e.qty;setv('unit',e.unit);$('fprice').value=e.price;$('ftva').value=e.tvaPct;pv()}else $('famt').value=e.amount;
   $('fsave').textContent='Update entry';$('fcancel').hidden=false;$('f').scrollIntoView({block:'nearest'})}
 function cancelEdit(){editId=null;hasForm=false;renderSup()}
@@ -279,8 +309,8 @@ function renderLedger(){
   const list=S.entries.map((e,i)=>({e,i})).filter(x=>x.e.sid===S.sel).sort((a,b)=>a.e.date<b.e.date?-1:a.e.date>b.e.date?1:a.i-b.i).map(x=>x.e);
   const run={};
   const rows=list.map(e=>{run[e.cur]=(run[e.cur]||0)+(isDr(e)?e.amount:-e.amount);const p=e.type==='purchase',d=isDr(e);
-    return `<tr class="${p?'':'pay'}"><td>${fd(e.date)}</td><td>${TL[e.type]}</td><td>${esc(e.inv)}</td><td>${esc(e.cat)}</td><td>${esc(e.prod)}</td><td class="r">${p?fmt(e.qty).replace(/\.00$/,'')+' '+esc(e.unit):''}</td><td>${esc(e.cur)}</td><td class="r">${p?fmt(e.price):''}</td><td class="r">${p?fmt(e.tva):''}</td><td class="r">${d?fmt(e.amount):''}</td><td class="r">${d?'':fmt(e.amount)}</td><td class="r"><b>${fmt(run[e.cur])}</b></td><td><button onclick="editEntry('${e.id}')">Edit</button> <button class="del" onclick="arm(this,()=>delEntry('${e.id}'))">Delete</button></td></tr>`}).join('');
-  $('led').innerHTML=list.length?`<table><thead><tr><th>Date</th><th>Type</th><th>Invoice / ref</th><th>Category</th><th>Product</th><th class="r">Qty</th><th>Cur</th><th class="r">Price</th><th class="r">TVA</th><th class="r">Debit</th><th class="r">Payment / credit</th><th class="r">Balance</th><th></th></tr></thead><tbody>${rows}</tbody></table>`:'<div class="empty">No entries yet. Fill the form above and save the first one.</div>';
+    return `<tr class="${p?'':'pay'}"><td>${fd(e.date)}</td><td>${TL[e.type]}</td><td>${esc(e.inv)}</td>${(S.customFields||[]).map(k=>`<td>${esc((e.customFields||{})[k]||'')}</td>`).join('')}<td>${esc(e.cat)}</td><td>${esc(e.prod)}</td><td class="r">${p?fmt(e.qty).replace(/\.00$/,'')+' '+esc(e.unit):''}</td><td>${esc(e.cur)}</td><td class="r">${p?fmt(e.price):''}</td><td class="r">${p?fmt(e.tva):''}</td><td class="r">${d?fmt(e.amount):''}</td><td class="r">${d?'':fmt(e.amount)}</td><td class="r"><b>${fmt(run[e.cur])}</b></td><td><button onclick="editEntry('${e.id}')">Edit</button> <button class="del" onclick="arm(this,()=>delEntry('${e.id}'))">Delete</button></td></tr>`}).join('');
+  $('led').innerHTML=list.length?`<table><thead><tr><th>Date</th><th>Type</th><th>Invoice / ref</th>${(S.customFields||[]).map(k=>`<th>${esc(k)}</th>`).join('')}<th>Category</th><th>Product</th><th class="r">Qty</th><th>Cur</th><th class="r">Price</th><th class="r">TVA</th><th class="r">Debit</th><th class="r">Payment / credit</th><th class="r">Balance</th><th></th></tr></thead><tbody>${rows}</tbody></table>`:'<div class="empty">No entries yet. Fill the form above and save the first one.</div>';
   const b=$('bal');if(b){const x=bal(S.sel);b.innerHTML=cs(x);b.className=Object.keys(x).some(c=>Math.abs(x[c])>0.004)?'':'z'}
 }
 
