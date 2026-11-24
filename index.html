@@ -3,21 +3,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Supplier Ledger</title>
 <style>
-:root{--bg:#f3f5f4;--card:#fff;--ink:#16211f;--mut:#66756f;--line:#dde4e1;--acc:#0e7c7b;--on:#fff;--warn:#c2410c;--row:#f7faf9;--in:#fff;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121817;--card:#1a2321;--ink:#e8efed;--mut:#8fa09a;--line:#2a3633;--acc:#4fb3b1;--on:#0b1a19;--warn:#ff8a5c;--row:#1e2a27;--in:#121a19;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#121817;--card:#1a2321;--ink:#e8efed;--mut:#8fa09a;--line:#2a3633;--acc:#4fb3b1;--on:#0b1a19;--warn:#ff8a5c;--row:#1e2a27;--in:#121a19;color-scheme:dark}
+:root{--bg:#f2f5fa;--card:#fff;--ink:#17243a;--mut:#68778d;--line:#dce4ef;--acc:#2563a6;--on:#fff;--warn:#c2410c;--row:#f3f7fc;--in:#fff;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
-header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line);background:var(--card)}
-h1{font-size:18px;margin:0 12px 0 0}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:16px 22px;border-bottom:1px solid var(--line);background:var(--card);box-shadow:0 2px 10px rgba(24,45,75,.04);position:sticky;top:0;z-index:30}
+h1{font-size:19px;letter-spacing:-.3px;margin:0 12px 0 0;color:var(--ink)}
 .tabs{display:flex;gap:6px}
-.tab,button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--in);color:var(--ink);padding:7px 12px;border-radius:6px}
-.tab.on,button.pri{background:var(--acc);color:var(--on);border-color:var(--acc);font-weight:600}
+.tab,button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--in);color:var(--ink);padding:7px 12px;border-radius:8px}
+.tab.on,button.pri{background:var(--acc);color:var(--on);border-color:var(--acc);font-weight:600}button:hover{filter:brightness(.97)}
 button.del{color:var(--warn)}
 .sp{flex:1}
-main{display:grid;grid-template-columns:270px 1fr;gap:16px;padding:16px 20px;align-items:start}
-.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px}
+main{display:grid;grid-template-columns:280px 1fr;gap:18px;padding:20px 22px;align-items:start;max-width:1800px;margin:auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:0 3px 14px rgba(24,45,75,.035)}
 .item{display:flex;justify-content:space-between;gap:8px;padding:9px 10px;border:1px solid var(--line);border-radius:6px;margin-bottom:7px;cursor:pointer;background:var(--in)}
 .item.on{border-color:var(--acc);box-shadow:inset 3px 0 0 var(--acc)}
 .item b{text-align:right;font-weight:600;font-size:13px}
@@ -46,13 +44,14 @@ h3{margin:18px 0 6px;font-size:15px}
 .cb{position:relative}.cb::after{content:"▾";position:absolute;right:9px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--mut)}
 .dd{position:absolute;z-index:20;left:0;right:0;top:100%;margin-top:2px;min-width:170px;max-height:220px;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:6px;box-shadow:0 8px 22px rgba(0,0,0,.2)}
 .dd .o{padding:8px 10px;cursor:pointer}.dd .o:hover{background:var(--row)}.dd .nw{color:var(--acc);font-weight:600}.search-select{position:relative}.search-select input{width:100%}.search-select .dd{display:none}.search-select.open .dd{display:block}.search-select .dd .empty-option{padding:9px 10px;color:var(--mut)}.filter-search{margin:8px 0 10px}.filter-search input{max-width:100%}.custom-field-cell{min-width:0}.custom-field-head{display:flex;align-items:center;justify-content:space-between;gap:6px}.custom-field-head button{padding:2px 6px;font-size:11px}.custom-field-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px}.custom-field-tools small{color:var(--mut)}
+.excel-mark{display:inline-grid;place-items:center;width:19px;height:19px;margin-right:5px;border-radius:4px;background:#16834b;color:#fff;font-size:12px;font-weight:800;line-height:1;vertical-align:middle}
 h2.t{margin:0;font-size:20px}
 @media(max-width:760px){main{grid-template-columns:1fr}}
 </style></head><body>
 <header><h1>Supplier Ledger</h1>
 <div class="tabs"><button class="tab on" id="t1" onclick="go(1)">Suppliers</button><button class="tab" id="t2" onclick="go(2)">Purchases by category</button></div>
 <span class="sp"></span>
-<button onclick="exp()">Export backup</button><button onclick="document.getElementById('imp').click()">Import backup</button>
+<button class="pri" id="excelBtn" onclick="exportExcel()" title="Download this page as an Excel workbook"><span class="excel-mark">X</span> Excel export</button><button onclick="exp()">Export backup</button><button onclick="document.getElementById('imp').click()">Import backup</button>
 <input type="file" id="imp" accept=".json" hidden onchange="imp(this)">
 </header>
 <main id="p1">
@@ -64,6 +63,7 @@ h2.t{margin:0;font-size:20px}
 <div class="card" id="cr"></div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 const KEY='supplier-ledger-v1';
 const SUPABASE_URL='https://tylwxpuarmkdbrhgiztb.supabase.co';
@@ -95,6 +95,10 @@ function normalizeState(){
   S.cats=S.cats||[];
   S.units=S.units||['PCS','CTN','KG','LTR'];
   S.products=S.products||[];
+  S.productByCat=S.productByCat||{};
+  // Migrate older shared product lists into category-specific lists using existing transactions.
+  (S.entries||[]).forEach(e=>{if(e.type==='purchase'&&e.cat&&e.prod){S.productByCat[e.cat]=S.productByCat[e.cat]||[];if(!S.productByCat[e.cat].some(x=>String(x).toLowerCase()===String(e.prod).toLowerCase()))S.productByCat[e.cat].push(e.prod)}});
+  if(Array.isArray(S.products)){S.products.forEach(prod=>{const matching=(S.entries||[]).filter(e=>e.type==='purchase'&&e.prod===prod&&e.cat).map(e=>e.cat);const targets=matching.length?[...new Set(matching)]:[S.csel||S.cats[0]].filter(Boolean);targets.forEach(cat=>{S.productByCat[cat]=S.productByCat[cat]||[];if(!S.productByCat[cat].some(x=>String(x).toLowerCase()===String(prod).toLowerCase()))S.productByCat[cat].push(prod)})})}
   S.customFields=S.customFields||[];
   S.entries=S.entries||[];
   S.entries.forEach(e=>{e.customFields=e.customFields||{}});
@@ -185,9 +189,9 @@ function sums(list,f){const o={};list.forEach(e=>{o[e.cur]=(o[e.cur]||0)+f(e)});
 function cs(o,empty){const k=Object.keys(o).filter(c=>Math.abs(o[c])>0.004);return k.length?k.map(c=>c+' '+fmt(o[c])).join('<br>'):(empty||'0.00')}
 function bal(sid){return sums(S.entries.filter(e=>e.sid===sid),e=>isDr(e)?e.amount:-e.amount)}
 function ensure(list,v){v=(v||'').trim();if(v&&!list.some(x=>x.toLowerCase()===v.toLowerCase()))list.push(v);return v}
-function go(n){page=n;$('p1').hidden=n!==1;$('p2').hidden=n!==2;$('t1').classList.toggle('on',n===1);$('t2').classList.toggle('on',n===2);n===1?renderSup():renderCat()}
+function go(n){page=n;$('excelBtn').innerHTML='<span class="excel-mark">X</span> '+(n===1?'Export Suppliers':'Export Categories');$('p1').hidden=n!==1;$('p2').hidden=n!==2;$('t1').classList.toggle('on',n===1);$('t2').classList.toggle('on',n===2);n===1?renderSup():renderCat()}
 function lists(){}
-const OPTS={cat:()=>S.cats,unit:()=>S.units,cur:()=>S.curs,prod:()=>[...new Set([...(S.products||[]),...S.entries.map(e=>e.prod).filter(Boolean)])]};
+const OPTS={cat:()=>S.cats,unit:()=>S.units,cur:()=>S.curs,prod:()=>{const cat=val('fcat');return [...new Set([...(S.productByCat?.[cat]||[]),...S.entries.filter(e=>e.type==='purchase'&&e.cat===cat).map(e=>e.prod).filter(Boolean)])]}};
 function fopts(k){return [...(OPTS[k]?OPTS[k]():[])].filter(Boolean).sort((a,b)=>String(a).localeCompare(String(b),undefined,{sensitivity:'base'}))}
 const NEWL={cat:'category',unit:'unit',cur:'currency',prod:'product'};
 const NEWT={cat:'New Category',unit:'New Unit',prod:'New Product',cur:'New Currency'};
@@ -215,13 +219,13 @@ function chooseOption(k,v,isNew=false){
   v=String(v||'').trim();if(!v)return;
   if(k==='cat'&&isNew){ensure(S.cats,v);save()}
   if(k==='unit'&&isNew){ensure(S.units,v);save()}
-  if(k==='prod'&&isNew){ensure(S.products,v);save()}
+  if(k==='prod'&&isNew){const cat=val('fcat');if(!cat){alert('Select a category before adding a product.');return}S.productByCat=S.productByCat||{};S.productByCat[cat]=S.productByCat[cat]||[];ensure(S.productByCat[cat],v);save()}
   if(k==='cur'&&isNew){ensure(S.curs,v.toUpperCase());v=v.toUpperCase();save()}
   if(k==='cur')v=v.toUpperCase();
   const sel=$(FID[k]);
   if(![...sel.options].some(o=>o.value===v))sel.add(new Option(v,v));
   sel.value=v;$(`${FID[k]}_search`).value=v;$(`${FID[k]}_box`).classList.remove('open');
-  if(k==='cat'){fill('prod');$('fprod_search').value='';}
+  if(k==='cat'){fill('prod');$('fprod_search').value='';$('fprod').value='';}
   if(k==='cur')pv();
 }
 function fill(k){
@@ -290,7 +294,7 @@ function saveEntry(){
   const e={id:editId||uid(),sid:S.sel,date:g('fdte'),type,inv:g('finv').trim(),cur:ensure(S.curs,val('fcur').toUpperCase())||'CFA',customFields:customFieldValues()};
   if(!e.date){m.textContent='Choose a date.';return}
   if(type==='purchase'){
-    e.cat=ensure(S.cats,val('fcat'));e.prod=val('fprod');e.qty=+g('fqty');e.unit=ensure(S.units,val('funit'));e.price=+g('fprice');e.tvaPct=+g('ftva')||0;
+    e.cat=ensure(S.cats,val('fcat'));e.prod=val('fprod');S.productByCat=S.productByCat||{};if(e.cat&&e.prod){S.productByCat[e.cat]=S.productByCat[e.cat]||[];ensure(S.productByCat[e.cat],e.prod)}e.qty=+g('fqty');e.unit=ensure(S.units,val('funit'));e.price=+g('fprice');e.tvaPct=+g('ftva')||0;
     if(!(e.qty>0)||!(e.price>=0)||g('fprice')===''){m.textContent='Enter quantity and price.';return}
     e.sub=e.qty*e.price;e.tva=e.sub*e.tvaPct/100;e.amount=e.sub+e.tva
   }else{e.amount=+g('famt');if(!(e.amount>0)){m.textContent='Enter an amount.';return}}
@@ -319,8 +323,8 @@ const purch=c=>S.entries.filter(e=>e.type==='purchase'&&e.cat===c);
 function addCat(){const n=ensure(S.cats,$('nc').value);if(!n)return;S.csel=n;$('nc').value='';save();renderCat()}
 function pickCat(c){S.csel=c;save();renderCat()}
 function renameCat(v){v=v.trim();const o=S.csel;if(!v||v===o)return;if(S.cats.some(x=>x.toLowerCase()===v.toLowerCase()&&x!==o)){renderCat();return}
-  S.cats=S.cats.map(c=>c===o?v:c);S.entries.forEach(e=>{if(e.cat===o)e.cat=v});S.csel=v;save();renderCat()}
-function delCat(){const o=S.csel;S.cats=S.cats.filter(c=>c!==o);S.entries.forEach(e=>{if(e.cat===o)e.cat=''});S.csel='';save();renderCat()}
+  S.cats=S.cats.map(c=>c===o?v:c);S.entries.forEach(e=>{if(e.cat===o)e.cat=v});S.productByCat=S.productByCat||{};if(S.productByCat[o]){S.productByCat[v]=[...new Set([...(S.productByCat[v]||[]),...S.productByCat[o]])];delete S.productByCat[o]}S.csel=v;save();renderCat()}
+function delCat(){const o=S.csel;S.cats=S.cats.filter(c=>c!==o);S.entries.forEach(e=>{if(e.cat===o)e.cat=''});if(S.productByCat)delete S.productByCat[o];S.csel='';save();renderCat()}
 function renderCat(){
   if(S.csel&&!S.cats.includes(S.csel))S.csel='';
   const c=S.csel,fs=window.cf||'',query=(window.catQuery||'').trim().toLowerCase();
@@ -342,6 +346,26 @@ function renderCat(){
 ${by.length?`<h3>Total by supplier</h3><div class="wrap" style="margin-top:0"><table style="min-width:0">${by.map(x=>`<tr><td>${esc(x.s.name)}</td><td class="r">${cs(x.t)}</td></tr>`).join('')}<tr><td><b>All suppliers</b></td><td class="r"><b>${tot(all)}</b></td></tr></table></div>`:''}
 <h3>Purchases</h3><div class="filter-search"><input id="purchaseSearch" placeholder="Search category, product, invoice, unit or currency..." value="${esc(window.catQuery||'')}" oninput="window.catQuery=this.value;renderCat()"></div><div class="wrap" style="margin-top:0">${sorted.length?`<table><thead><tr><th>Supplier</th><th>Category</th><th>Product</th><th class="r">Qty</th><th>Unit</th><th>Cur</th><th class="r">Price</th><th class="r">TVA</th><th class="r">Total with TVA</th></tr></thead><tbody>${sorted.map(r=>{const e=r.e;return `<tr><td>${esc(sn(e.sid))}</td><td>${esc(e.cat)}</td><td>${esc(e.prod)}${r.n>1?` <span class="mut">(${r.n} entries)</span>`:''}</td><td class="r">${fmt(r.qty).replace(/\.00$/,'')}</td><td>${esc(e.unit)}</td><td>${esc(e.cur)}</td><td class="r">${fmt(e.price)}</td><td class="r">${fmt(r.tva)}</td><td class="r"><b>${fmt(r.amt)}</b></td></tr>`}).join('')}</tbody></table>`:'<div class="empty">No purchases to show.</div>'}</div>`;
   if(wasSearching){const si=$('purchaseSearch');si.focus();if(cursor!==null)si.setSelectionRange(cursor,cursor)}
+}
+
+/* ---------- Excel workbooks ---------- */
+function excelReady(){if(!window.XLSX){alert('Excel export library did not load. Check your internet connection and try again.');return false}return true}
+function safeSheetName(name,used){let base=String(name||'Sheet').replace(/[\\/?*\[\]:]/g,' ').trim().slice(0,31)||'Sheet';let out=base,n=2;while(used.has(out.toLowerCase())){const suffix=' '+n++;out=base.slice(0,31-suffix.length)+suffix}used.add(out.toLowerCase());return out}
+function addSheet(wb,rows,name,used){const ws=XLSX.utils.json_to_sheet(rows);ws['!cols']=rows.length?Object.keys(rows[0]).map(k=>({wch:Math.min(32,Math.max(12,k.length+3))})):[];XLSX.utils.book_append_sheet(wb,ws,safeSheetName(name,used))}
+function entryExcelRow(e){return {'Date':fd(e.date),'Entry Type':TL[e.type]||e.type,'Invoice / Reference':e.inv||'','Category':e.cat||'','Product':e.prod||'','Quantity':e.qty??'','Unit':e.unit||'','Currency':e.cur||'','Price':e.price??'','TVA':e.tva??'','Debit':isDr(e)?e.amount:'','Payment / Credit':isDr(e)?'':e.amount,'Amount':e.amount,...Object.fromEntries((S.customFields||[]).map(k=>[k,(e.customFields||{})[k]||'']))}}
+function exportExcel(){if(!excelReady())return;const wb=XLSX.utils.book_new(),used=new Set();
+  if(page===1){
+    const summary=S.suppliers.map(s=>{const balances=bal(s.id);return {'Supplier':s.name,'Transactions':S.entries.filter(e=>e.sid===s.id).length,...Object.fromEntries(Object.entries(balances).map(([cur,amount])=>['Balance '+cur,amount]))}});
+    addSheet(wb,summary,'Suppliers',used);
+    S.suppliers.forEach(s=>{const rows=S.entries.filter(e=>e.sid===s.id).sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map(entryExcelRow);addSheet(wb,rows.length?rows:[{'Supplier':s.name,'Information':'No transactions'}],s.name,used)});
+    XLSX.writeFile(wb,'Supplier-Ledger.xlsx');
+  }else{
+    const purchases=S.entries.filter(e=>e.type==='purchase');
+    const summary=S.cats.map(c=>{const rows=purchases.filter(e=>e.cat===c);const totals={};rows.forEach(e=>totals[e.cur]=(totals[e.cur]||0)+Number(e.amount||0));return {'Category':c,'Purchase Entries':rows.length,...Object.fromEntries(Object.entries(totals).map(([cur,amount])=>['Total '+cur,amount]))}});
+    addSheet(wb,summary,'All Categories',used);
+    S.cats.forEach(c=>{const rows=purchases.filter(e=>e.cat===c).sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map(e=>({'Supplier':(S.suppliers.find(s=>s.id===e.sid)||{}).name||'',...entryExcelRow(e)}));addSheet(wb,rows.length?rows:[{'Category':c,'Information':'No purchases'}],c,used)});
+    XLSX.writeFile(wb,'Purchases-by-Category.xlsx');
+  }
 }
 
 /* ---------- Backup ---------- */
