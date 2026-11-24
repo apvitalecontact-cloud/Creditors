@@ -3,22 +3,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Supplier Ledger</title>
 <style>
-:root{--bg:#f2f5fa;--card:#fff;--ink:#17243a;--mut:#68778d;--line:#dce4ef;--acc:#2563a6;--on:#fff;--warn:#c2410c;--row:#f3f7fc;--in:#fff;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{--bg:#f3f5f4;--card:#fff;--ink:#16211f;--mut:#66756f;--line:#dde4e1;--acc:#0e7c7b;--on:#fff;--warn:#c2410c;--row:#f7faf9;--in:#fff;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121817;--card:#1a2321;--ink:#e8efed;--mut:#8fa09a;--line:#2a3633;--acc:#4fb3b1;--on:#0b1a19;--warn:#ff8a5c;--row:#1e2a27;--in:#121a19;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121817;--card:#1a2321;--ink:#e8efed;--mut:#8fa09a;--line:#2a3633;--acc:#4fb3b1;--on:#0b1a19;--warn:#ff8a5c;--row:#1e2a27;--in:#121a19;color-scheme:dark}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
-header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:16px 22px;border-bottom:1px solid var(--line);background:var(--card);box-shadow:0 2px 10px rgba(24,45,75,.04);position:sticky;top:0;z-index:30}
-h1{font-size:19px;letter-spacing:-.3px;margin:0 12px 0 0;color:var(--ink)}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line);background:var(--card)}
+h1{font-size:18px;margin:0 12px 0 0}
 .tabs{display:flex;gap:6px}
-.tab,button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--in);color:var(--ink);padding:7px 12px;border-radius:8px}
-.tab.on,button.pri{background:var(--acc);color:var(--on);border-color:var(--acc);font-weight:600}button:hover{filter:brightness(.97)}
+.tab,button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--in);color:var(--ink);padding:7px 12px;border-radius:6px}
+.tab.on,button.pri{background:var(--acc);color:var(--on);border-color:var(--acc);font-weight:600}
 button.del{color:var(--warn)}
 .sp{flex:1}
-main{display:grid;grid-template-columns:280px 1fr;gap:18px;padding:20px 22px;align-items:start;max-width:1800px;margin:auto}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:0 3px 14px rgba(24,45,75,.035)}
+main{display:grid;grid-template-columns:270px 1fr;gap:16px;padding:16px 20px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px}
 .item{display:flex;justify-content:space-between;gap:8px;padding:9px 10px;border:1px solid var(--line);border-radius:6px;margin-bottom:7px;cursor:pointer;background:var(--in)}
 .item.on{border-color:var(--acc);box-shadow:inset 3px 0 0 var(--acc)}
 .item b{text-align:right;font-weight:600;font-size:13px}
+.actions{position:relative;display:inline-flex;align-items:center}.more{width:28px;height:28px;padding:0;border-radius:50%;font-size:18px;line-height:1}.menu{display:none;position:absolute;right:0;top:calc(100% + 4px);z-index:30;min-width:110px;padding:4px;background:var(--card);border:1px solid var(--line);border-radius:7px;box-shadow:0 6px 18px #0002}.menu.open{display:grid}.menu button{border:0;text-align:left;background:transparent;padding:7px 9px}.menu button:hover{background:var(--row)}.form-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0}.form-panel{padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--row)}.form-actions{grid-column:1/-1;display:flex;align-items:center;justify-content:flex-end;gap:8px}.supplier-title{font-size:20px;font-weight:700}
 .item small{display:block;color:var(--mut)}
 input,select{font:inherit;color:var(--ink);background:var(--in);border:1px solid var(--line);border-radius:6px;padding:8px;width:100%;min-width:0}
 input:focus,select:focus,button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
@@ -43,15 +46,14 @@ h3{margin:18px 0 6px;font-size:15px}
 [hidden]{display:none!important}
 .cb{position:relative}.cb::after{content:"▾";position:absolute;right:9px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--mut)}
 .dd{position:absolute;z-index:20;left:0;right:0;top:100%;margin-top:2px;min-width:170px;max-height:220px;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:6px;box-shadow:0 8px 22px rgba(0,0,0,.2)}
-.dd .o{padding:8px 10px;cursor:pointer}.dd .o:hover{background:var(--row)}.dd .nw{color:var(--acc);font-weight:600}.search-select{position:relative}.search-select input{width:100%}.search-select .dd{display:none}.search-select.open .dd{display:block}.search-select .dd .empty-option{padding:9px 10px;color:var(--mut)}.filter-search{margin:8px 0 10px}.filter-search input{max-width:100%}.custom-field-cell{min-width:0}.custom-field-head{display:flex;align-items:center;justify-content:space-between;gap:6px}.custom-field-head button{padding:2px 6px;font-size:11px}.custom-field-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px}.custom-field-tools small{color:var(--mut)}
-.excel-mark{display:inline-grid;place-items:center;width:19px;height:19px;margin-right:5px;border-radius:4px;background:#16834b;color:#fff;font-size:12px;font-weight:800;line-height:1;vertical-align:middle}
+.dd .o{padding:8px 10px;cursor:pointer}.dd .o:hover{background:var(--row)}.dd .nw{color:var(--acc);font-weight:600}.search-select{position:relative}.search-select input{width:100%}.search-select .dd{display:none}.search-select.open .dd{display:block}.search-select .dd .empty-option{padding:9px 10px;color:var(--mut)}.filter-search{margin:8px 0 10px}.filter-search input{max-width:100%}
 h2.t{margin:0;font-size:20px}
 @media(max-width:760px){main{grid-template-columns:1fr}}
 </style></head><body>
 <header><h1>Supplier Ledger</h1>
 <div class="tabs"><button class="tab on" id="t1" onclick="go(1)">Suppliers</button><button class="tab" id="t2" onclick="go(2)">Purchases by category</button></div>
 <span class="sp"></span>
-<button class="pri" id="excelBtn" onclick="exportExcel()" title="Download this page as an Excel workbook"><span class="excel-mark">X</span> Excel export</button><button onclick="exp()">Export backup</button><button onclick="document.getElementById('imp').click()">Import backup</button>
+<button onclick="exp()">Export backup</button><button onclick="document.getElementById('imp').click()">Import backup</button>
 <input type="file" id="imp" accept=".json" hidden onchange="imp(this)">
 </header>
 <main id="p1">
@@ -59,11 +61,10 @@ h2.t{margin:0;font-size:20px}
 <div class="card" id="sr"></div>
 </main>
 <main id="p2" hidden>
-<div class="card"><div id="cl"></div><div class="add"><input id="nc" placeholder="New category name" onkeydown="if(event.key==='Enter')addCat()"><button class="pri" onclick="addCat()">Add</button></div></div>
+<div class="card"><div id="cl"></div></div>
 <div class="card" id="cr"></div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 const KEY='supplier-ledger-v1';
 const SUPABASE_URL='https://tylwxpuarmkdbrhgiztb.supabase.co';
@@ -75,15 +76,13 @@ let localSaved=false;
 try{S=JSON.parse(localStorage.getItem(KEY));localSaved=!!(S&&S.suppliers&&S.entries)}catch(e){}
 
 const defaultState=()=>({
-  suppliers:[1,2,3,4,5].map(i=>({id:'s'+i,name:'Supplier '+i})),
-  cats:['Raw Material','Assets'],
+  suppliers:[],
+  cats:['RAW MATERIAL','FIXED ASSET','SPARE PARTS','LABORATORY','CHEMICAL','OTR TICKETS','FINISHED GOODS','NO CATEGORY'],
   units:['PCS','CTN','KG','LTR'],
-  products:[],
-  customFields:[],
   curs:['XOF','USD','EUR'],
   entries:[],
-  sel:'s1',
-  csel:'Raw Material'
+  sel:null,
+  csel:''
 });
 if(!S||!S.suppliers)S=defaultState();
 
@@ -92,17 +91,10 @@ let remoteReady=false;
 let applyingRemote=false;
 
 function normalizeState(){
-  S.cats=S.cats||[];
+  S.cats=['RAW MATERIAL','FIXED ASSET','SPARE PARTS','LABORATORY','CHEMICAL','OTR TICKETS','FINISHED GOODS','NO CATEGORY'];
   S.units=S.units||['PCS','CTN','KG','LTR'];
-  S.products=S.products||[];
-  S.productByCat=S.productByCat||{};
-  // Migrate older shared product lists into category-specific lists using existing transactions.
-  (S.entries||[]).forEach(e=>{if(e.type==='purchase'&&e.cat&&e.prod){S.productByCat[e.cat]=S.productByCat[e.cat]||[];if(!S.productByCat[e.cat].some(x=>String(x).toLowerCase()===String(e.prod).toLowerCase()))S.productByCat[e.cat].push(e.prod)}});
-  if(Array.isArray(S.products)){S.products.forEach(prod=>{const matching=(S.entries||[]).filter(e=>e.type==='purchase'&&e.prod===prod&&e.cat).map(e=>e.cat);const targets=matching.length?[...new Set(matching)]:[S.csel||S.cats[0]].filter(Boolean);targets.forEach(cat=>{S.productByCat[cat]=S.productByCat[cat]||[];if(!S.productByCat[cat].some(x=>String(x).toLowerCase()===String(prod).toLowerCase()))S.productByCat[cat].push(prod)})})}
-  S.customFields=S.customFields||[];
-  S.entries=S.entries||[];
-  S.entries.forEach(e=>{e.customFields=e.customFields||{}});
   S.curs=(S.curs||[]).map(c=>c==='XOF'?'CFA':c);
+  S.entries=S.entries||[];
   S.entries.forEach(e=>{if(e.cur==='XOF')e.cur='CFA'});
   ['CFA','USD','EUR','AED'].forEach(c=>{if(!S.curs.includes(c))S.curs.push(c)});
   if(S.sel&&!S.suppliers.some(s=>s.id===S.sel))S.sel=S.suppliers[0]?.id||null;
@@ -181,7 +173,7 @@ const uid=()=>Math.random().toString(36).slice(2,9);
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fmt=n=>Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fd=d=>d?d.split('-').reverse().join('-'):'';
-const TL={purchase:'Purchase',payment:'Payment',debitadj:'Debit Adjustment',creditadj:'Credit Adjustment'};
+const TL={purchase:'Purchase',payment:'Payment',debitadj:'Debit Adjustment',creditadj:'Credit Adjustment',return:'RETURN'};
 const isDr=e=>e.type==='purchase'||e.type==='debitadj';
 let editId=null,page=1,hasForm=false;
 function arm(b,fn){if(b.dataset.a){fn();return}b.dataset.a=1;const t=b.textContent;b.textContent='Click again to confirm';setTimeout(()=>{delete b.dataset.a;b.textContent=t},3000)}
@@ -189,43 +181,35 @@ function sums(list,f){const o={};list.forEach(e=>{o[e.cur]=(o[e.cur]||0)+f(e)});
 function cs(o,empty){const k=Object.keys(o).filter(c=>Math.abs(o[c])>0.004);return k.length?k.map(c=>c+' '+fmt(o[c])).join('<br>'):(empty||'0.00')}
 function bal(sid){return sums(S.entries.filter(e=>e.sid===sid),e=>isDr(e)?e.amount:-e.amount)}
 function ensure(list,v){v=(v||'').trim();if(v&&!list.some(x=>x.toLowerCase()===v.toLowerCase()))list.push(v);return v}
-function go(n){page=n;$('excelBtn').innerHTML='<span class="excel-mark">X</span> '+(n===1?'Export Suppliers':'Export Categories');$('p1').hidden=n!==1;$('p2').hidden=n!==2;$('t1').classList.toggle('on',n===1);$('t2').classList.toggle('on',n===2);n===1?renderSup():renderCat()}
+function go(n){page=n;$('p1').hidden=n!==1;$('p2').hidden=n!==2;$('t1').classList.toggle('on',n===1);$('t2').classList.toggle('on',n===2);n===1?renderSup():renderCat()}
 function lists(){}
-const OPTS={cat:()=>S.cats,unit:()=>S.units,cur:()=>S.curs,prod:()=>{const cat=val('fcat');return [...new Set([...(S.productByCat?.[cat]||[]),...S.entries.filter(e=>e.type==='purchase'&&e.cat===cat).map(e=>e.prod).filter(Boolean)])]}};
-function fopts(k){return [...(OPTS[k]?OPTS[k]():[])].filter(Boolean).sort((a,b)=>String(a).localeCompare(String(b),undefined,{sensitivity:'base'}))}
+const OPTS={cat:()=>S.cats,unit:()=>S.units,cur:()=>S.curs,prod:()=>[...new Set(S.entries.map(e=>e.prod).filter(Boolean))]};
 const NEWL={cat:'category',unit:'unit',cur:'currency',prod:'product'};
 const NEWT={cat:'New Category',unit:'New Unit',prod:'New Product',cur:'New Currency'};
 const FID={cat:'fcat',unit:'funit',prod:'fprod',cur:'fcur'};
+function fopts(k){return OPTS[k]();}
 function val(id){return $(id).value||''}
 function optionKey(ev,k){if(ev.key==='Enter'){ev.preventDefault();const q=$(`${FID[k]}_search`).value.trim();const opts=fopts(k);const exact=opts.find(x=>x.toLowerCase()===q.toLowerCase());if(exact)chooseOption(k,exact);else if(q)chooseOption(k,q,true)}}
 function searchOptions(k){
   const input=$(`${FID[k]}_search`),box=$(`${FID[k]}_box`),dd=$(`${FID[k]}_dd`);
   if(!input||!box||!dd)return;
-  const raw=input.value.trim(),q=raw.toLowerCase(),opts=fopts(k);
+  const q=input.value.trim().toLowerCase(),opts=fopts(k);
   const matches=opts.filter(x=>String(x).toLowerCase().includes(q));
-  let html=`<div class="o nw" onmousedown="event.preventDefault()" onclick="createOptionPrompt('${k}')">＋ New ${NEWT[k]}</div>`;
-  html+=matches.map(x=>`<div class="o" onmousedown="event.preventDefault()" onclick="chooseOption('${k}',decodeURIComponent('${encodeURIComponent(x)}'))">${esc(x)}</div>`).join('');
-  if(q&&!matches.some(x=>String(x).toLowerCase()===q))html+=`<div class="o nw" onmousedown="event.preventDefault()" onclick="chooseOption('${k}',decodeURIComponent('${encodeURIComponent(raw)}'),true)">＋ Add “${esc(raw)}”</div>`;
-  if(!matches.length&&!q)html+='<div class="empty-option">No saved options yet</div>';
+  let html=matches.map(x=>`<div class="o" onmousedown="event.preventDefault()" onclick="chooseOption('${k}',decodeURIComponent('${encodeURIComponent(x)}') )">${esc(x)}</div>`).join('');
+  if(k!=='cat'&&q&&!matches.some(x=>String(x).toLowerCase()===q))html+=`<div class="o nw" onmousedown="event.preventDefault()" onclick="chooseOption('${k}',decodeURIComponent('${encodeURIComponent(input.value.trim())}'),true)">＋ New ${NEWT[k].replace(/^New /,'')} “${esc(input.value.trim())}”</div>`;
+  if(!html)html='<div class="empty-option">No matches</div>';
   dd.innerHTML=html;box.classList.add('open');
-}
-function createOptionPrompt(k){
-  const label=NEWT[k].replace(/^New /,'');
-  const typed=$(`${FID[k]}_search`).value.trim();
-  const value=prompt(`Enter ${label.toLowerCase()} name:`,typed);
-  if(value&&value.trim())chooseOption(k,value.trim(),true);
 }
 function chooseOption(k,v,isNew=false){
   v=String(v||'').trim();if(!v)return;
-  if(k==='cat'&&isNew){ensure(S.cats,v);save()}
+  if(k==='cat'){v=v.toUpperCase();if(!S.cats.includes(v))v='NO CATEGORY';}
   if(k==='unit'&&isNew){ensure(S.units,v);save()}
-  if(k==='prod'&&isNew){const cat=val('fcat');if(!cat){alert('Select a category before adding a product.');return}S.productByCat=S.productByCat||{};S.productByCat[cat]=S.productByCat[cat]||[];ensure(S.productByCat[cat],v);save()}
   if(k==='cur'&&isNew){ensure(S.curs,v.toUpperCase());v=v.toUpperCase();save()}
   if(k==='cur')v=v.toUpperCase();
   const sel=$(FID[k]);
   if(![...sel.options].some(o=>o.value===v))sel.add(new Option(v,v));
   sel.value=v;$(`${FID[k]}_search`).value=v;$(`${FID[k]}_box`).classList.remove('open');
-  if(k==='cat'){fill('prod');$('fprod_search').value='';$('fprod').value='';}
+  if(k==='cat'){fill('prod');$('fprod_search').value='';}
   if(k==='cur')pv();
 }
 function fill(k){
@@ -249,11 +233,11 @@ function renderSup(){
   lists();renderSupList();
   const s=S.suppliers.find(x=>x.id===S.sel);
   if(!s){$('sr').innerHTML='<div class="empty">Add a supplier on the left to begin.</div>';return}
-  if(!hasForm){
-    $('sr').innerHTML=`<div class="top"><div><input class="name" id="sn" value="${esc(s.name)}" onchange="renameSup(this.value)" aria-label="Supplier name"> <button class="del" onclick="arm(this,delSup)">Delete supplier</button></div><div class="big"><span class="mut">Balance owed</span><div id="bal"></div></div></div>
+  $('sr').innerHTML=`<div class="top"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span class="supplier-title">${esc(s.name)}</span><button class="pri" onclick="toggleEntry()">${hasForm?'− Close Entry':'＋ Add Entry'}</button><span class="actions"><button class="more" aria-label="Supplier actions" onclick="toggleMenu(event,'supmenu')">＋</button><span class="menu" id="supmenu"><button onclick="editSupplier()">Edit</button><button onclick="deleteSupplier()">Delete</button></span></span></div><div class="big"><span class="mut">Balance owed</span><div id="bal"></div></div></div>
+<div class="form-head"><b>Entry details</b></div><div class="form-panel" id="entryPanel" ${hasForm?'':'hidden'}>
 <div class="form" id="f">
 <div><label>Date</label><input type="date" id="fdte"></div>
-<div><label>Entry type</label><select id="ftype" onchange="typ()"><option value="purchase">Purchase</option><option value="payment">Payment</option><option value="debitadj">Debit Adjustment</option><option value="creditadj">Credit Adjustment</option></select></div>
+<div><label>Entry type</label><select id="ftype" onchange="typ()"><option value="purchase">Purchase</option><option value="payment">Payment</option><option value="return">RETURN</option><option value="debitadj">Debit Adjustment</option><option value="creditadj">Credit Adjustment</option></select></div>
 <div><label>Invoice / reference</label><input id="finv"></div>
 <div class="po"><label>Category</label><div class="search-select" id="fcat_box"><input id="fcat_search" placeholder="Search category..." autocomplete="off" oninput="searchOptions('cat')" onfocus="searchOptions('cat')" onkeydown="optionKey(event,'cat')"><div class="dd" id="fcat_dd"></div><select id="fcat" hidden></select></div></div>
 <div class="po"><label>Product</label><div class="search-select" id="fprod_box"><input id="fprod_search" placeholder="Search product..." autocomplete="off" oninput="searchOptions('prod')" onfocus="searchOptions('prod')" onkeydown="optionKey(event,'prod')"><div class="dd" id="fprod_dd"></div><select id="fprod" hidden></select></div></div>
@@ -261,60 +245,46 @@ function renderSup(){
 <div class="po"><label>Unit</label><div class="search-select" id="funit_box"><input id="funit_search" placeholder="Search unit..." autocomplete="off" oninput="searchOptions('unit')" onfocus="searchOptions('unit')" onkeydown="optionKey(event,'unit')"><div class="dd" id="funit_dd"></div><select id="funit" hidden></select></div></div>
 <div class="po"><label>Price before TVA</label><input type="number" id="fprice" min="0" step="any" oninput="pv()"></div>
 <div class="po"><label>TVA %</label><input type="number" id="ftva" value="18" min="0" step="any" oninput="pv()"></div>
+<div class="po"><label>Transport / Freight</label><input type="number" id="ftransport" min="0" step="any" value="0" oninput="pv()"></div>
 <div><label>Currency</label><div class="search-select" id="fcur_box"><input id="fcur_search" placeholder="Search currency..." autocomplete="off" oninput="searchOptions('cur')" onfocus="searchOptions('cur')" onkeydown="optionKey(event,'cur')"><div class="dd" id="fcur_dd"></div><select id="fcur" hidden></select></div></div>
 <div class="pa"><label>Amount</label><input type="number" id="famt" min="0" step="any"></div>
-<div id="customFields" style="display:contents"></div>
-<div class="custom-field-tools"><button type="button" onclick="addCustomField()">＋ Add column</button><small>Extra fields you create will be saved with each entry.</small></div>
-<div style="display:flex;gap:6px"><button class="pri" id="fsave" onclick="saveEntry()">Save entry</button><button id="fcancel" onclick="cancelEdit()" hidden>Cancel</button></div>
-</div><p class="pre" id="pre"></p><p class="msg" id="msg"></p>
-<div class="wrap" id="led"></div>`;
-    hasForm=true;['cat','unit','prod','cur'].forEach(fill);renderCustomFields();$('fdte').value=new Date().toISOString().slice(0,10);typ();renderBal()
-  }
-  renderLedger();renderSupList()
+<div class="form-actions"><button id="fcancel" onclick="cancelEdit()" hidden>Cancel</button><button class="pri" id="fsave" onclick="saveEntry()">Save entry</button></div>
+</div></div><p class="pre" id="pre"></p><p class="msg" id="msg"></p><div class="wrap" id="led"></div>`;
+  ['cat','unit','prod','cur'].forEach(fill);$('fdte').value=new Date().toISOString().slice(0,10);typ();renderLedger();renderSupList();
 }
-function customFieldValues(){const out={};(S.customFields||[]).forEach((name,i)=>{const el=$(`custom_${i}`);out[name]=el?el.value:''});return out}
-function renderCustomFields(values={}){
-  const host=$('customFields');if(!host)return;
-  host.innerHTML=(S.customFields||[]).map((name,i)=>`<div class="custom-field-cell"><div class="custom-field-head"><label for="custom_${i}">${esc(name)}</label><button type="button" class="del" title="Remove this column" onclick="removeCustomField(${i})">Remove</button></div><input id="custom_${i}" value="${esc(values[name]||'')}" placeholder="${esc(name)}"></div>`).join('');
-}
-function addCustomField(){
-  const name=prompt('Enter the new column heading:');if(!name||!name.trim())return;
-  const clean=name.trim();if((S.customFields||[]).some(x=>x.toLowerCase()===clean.toLowerCase())){alert('That column already exists.');return}
-  const values=customFieldValues();S.customFields=S.customFields||[];S.customFields.push(clean);save();renderCustomFields(values);
-}
-function removeCustomField(i){
-  if(!confirm(`Remove the “${S.customFields[i]}” column from the entry form? Existing saved values will be kept in the records.`))return;
-  const values=customFieldValues();S.customFields.splice(i,1);save();renderCustomFields(values);
-}
+function toggleEntry(){hasForm=!hasForm;$('entryPanel').hidden=!hasForm;const b=document.querySelector('.top .pri');if(b)b.textContent=hasForm?'− Close Entry':'＋ Add Entry';if(hasForm)$('fdte').focus()}
+function toggleMenu(ev,id){ev.stopPropagation();document.querySelectorAll('.menu.open').forEach(m=>{if(m.id!==id)m.classList.remove('open')});$(id).classList.toggle('open')}
+function editSupplier(){const s=S.suppliers.find(x=>x.id===S.sel);if(!s)return;const n=prompt('Edit supplier name:',s.name);if(n&&n.trim()){s.name=n.trim();save();renderSup()}}
+function deleteSupplier(){const s=S.suppliers.find(x=>x.id===S.sel);if(!s||!confirm(`Delete supplier ${s.name} and all its transactions?`))return;delSup()}
 function renderBal(){}
-function typ(){const p=$('ftype').value==='purchase';$('f').classList.toggle('np',!p);document.querySelector('.pa').style.display=p?'none':'block';pv()}
-function pv(){const el=$('pre');if($('ftype').value!=='purchase'){el.textContent='';return}const q=+$('fqty').value||0,p=+$('fprice').value||0,t=+$('ftva').value||0,sub=q*p;el.textContent=`Subtotal ${fmt(sub)} + TVA ${fmt(sub*t/100)} = ${fmt(sub*(1+t/100))} ${val('fcur')}`}
+function typ(){const t=$('ftype').value,p=t==='purchase'||t==='return';$('f').classList.toggle('np',!p);document.querySelector('.pa').style.display=p?'none':'block';pv()}
+function pv(){const el=$('pre');if(!['purchase','return'].includes($('ftype').value)){el.textContent='';return}const q=+$('fqty').value||0,p=+$('fprice').value||0,t=+$('ftva').value||0,tr=+$('ftransport').value||0,sub=q*p;el.textContent=`Subtotal ${fmt(sub)} + TVA ${fmt(sub*t/100)} + Transport / Freight ${fmt(tr)} = ${fmt(sub*(1+t/100)+tr)} ${val('fcur')}`}
 function saveEntry(){
   const g=id=>$(id).value,type=g('ftype'),m=$('msg');m.textContent='';
-  const e={id:editId||uid(),sid:S.sel,date:g('fdte'),type,inv:g('finv').trim(),cur:ensure(S.curs,val('fcur').toUpperCase())||'CFA',customFields:customFieldValues()};
+  const e={id:editId||uid(),sid:S.sel,date:g('fdte'),type,inv:g('finv').trim(),cur:ensure(S.curs,val('fcur').toUpperCase())||'CFA'};
   if(!e.date){m.textContent='Choose a date.';return}
-  if(type==='purchase'){
-    e.cat=ensure(S.cats,val('fcat'));e.prod=val('fprod');S.productByCat=S.productByCat||{};if(e.cat&&e.prod){S.productByCat[e.cat]=S.productByCat[e.cat]||[];ensure(S.productByCat[e.cat],e.prod)}e.qty=+g('fqty');e.unit=ensure(S.units,val('funit'));e.price=+g('fprice');e.tvaPct=+g('ftva')||0;
+  if(type==='purchase'||type==='return'){
+    e.cat=val('fcat')||'NO CATEGORY';e.prod=val('fprod');e.qty=+g('fqty');e.unit=ensure(S.units,val('funit'));e.price=+g('fprice');e.tvaPct=+g('ftva')||0;e.transport=+g('ftransport')||0;
     if(!(e.qty>0)||!(e.price>=0)||g('fprice')===''){m.textContent='Enter quantity and price.';return}
-    e.sub=e.qty*e.price;e.tva=e.sub*e.tvaPct/100;e.amount=e.sub+e.tva
+    e.sub=e.qty*e.price;e.tva=e.sub*e.tvaPct/100;e.amount=e.sub+e.tva+e.transport
   }else{e.amount=+g('famt');if(!(e.amount>0)){m.textContent='Enter an amount.';return}}
   const i=S.entries.findIndex(x=>x.id===e.id);i>=0?S.entries[i]=e:S.entries.push(e);
   save();editId=null;hasForm=false;renderSup();
   $('ftype').value=type;typ()
 }
-function editEntry(id){const e=S.entries.find(x=>x.id===id);if(!e)return;editId=id;
-  $('fdte').value=e.date;$('ftype').value=e.type;$('finv').value=e.inv||'';setv('cur',e.cur);renderCustomFields(e.customFields||{});typ();
-  if(e.type==='purchase'){setv('cat',e.cat);setv('prod',e.prod);$('fqty').value=e.qty;setv('unit',e.unit);$('fprice').value=e.price;$('ftva').value=e.tvaPct;pv()}else $('famt').value=e.amount;
+function editEntry(id){const e=S.entries.find(x=>x.id===id);if(!e)return;editId=id;hasForm=true;renderSup();
+  $('fdte').value=e.date;$('ftype').value=e.type;$('finv').value=e.inv||'';setv('cur',e.cur);typ();
+  if(e.type==='purchase'||e.type==='return'){setv('cat',e.cat);setv('prod',e.prod);$('fqty').value=e.qty;setv('unit',e.unit);$('fprice').value=e.price;$('ftva').value=e.tvaPct;$('ftransport').value=e.transport||0;pv()}else $('famt').value=e.amount;
   $('fsave').textContent='Update entry';$('fcancel').hidden=false;$('f').scrollIntoView({block:'nearest'})}
 function cancelEdit(){editId=null;hasForm=false;renderSup()}
-function delEntry(id){S.entries=S.entries.filter(e=>e.id!==id);save();renderSup2()}
+function delEntry(id){const e=S.entries.find(x=>x.id===id);if(!e||!confirm('Delete this transaction?'))return;S.entries=S.entries.filter(x=>x.id!==id);save();renderSup2()}
 function renderSup2(){renderLedger();renderSupList()}
 function renderLedger(){
   const list=S.entries.map((e,i)=>({e,i})).filter(x=>x.e.sid===S.sel).sort((a,b)=>a.e.date<b.e.date?-1:a.e.date>b.e.date?1:a.i-b.i).map(x=>x.e);
   const run={};
-  const rows=list.map(e=>{run[e.cur]=(run[e.cur]||0)+(isDr(e)?e.amount:-e.amount);const p=e.type==='purchase',d=isDr(e);
-    return `<tr class="${p?'':'pay'}"><td>${fd(e.date)}</td><td>${TL[e.type]}</td><td>${esc(e.inv)}</td>${(S.customFields||[]).map(k=>`<td>${esc((e.customFields||{})[k]||'')}</td>`).join('')}<td>${esc(e.cat)}</td><td>${esc(e.prod)}</td><td class="r">${p?fmt(e.qty).replace(/\.00$/,'')+' '+esc(e.unit):''}</td><td>${esc(e.cur)}</td><td class="r">${p?fmt(e.price):''}</td><td class="r">${p?fmt(e.tva):''}</td><td class="r">${d?fmt(e.amount):''}</td><td class="r">${d?'':fmt(e.amount)}</td><td class="r"><b>${fmt(run[e.cur])}</b></td><td><button onclick="editEntry('${e.id}')">Edit</button> <button class="del" onclick="arm(this,()=>delEntry('${e.id}'))">Delete</button></td></tr>`}).join('');
-  $('led').innerHTML=list.length?`<table><thead><tr><th>Date</th><th>Type</th><th>Invoice / ref</th>${(S.customFields||[]).map(k=>`<th>${esc(k)}</th>`).join('')}<th>Category</th><th>Product</th><th class="r">Qty</th><th>Cur</th><th class="r">Price</th><th class="r">TVA</th><th class="r">Debit</th><th class="r">Payment / credit</th><th class="r">Balance</th><th></th></tr></thead><tbody>${rows}</tbody></table>`:'<div class="empty">No entries yet. Fill the form above and save the first one.</div>';
+  const rows=list.map(e=>{run[e.cur]=(run[e.cur]||0)+(isDr(e)?e.amount:-e.amount);const p=e.type==='purchase'||e.type==='return',d=isDr(e);
+    return `<tr class="${d?'':'pay'}"><td>${fd(e.date)}</td><td>${TL[e.type]||e.type}</td><td>${esc(e.inv)}</td><td>${esc(e.cat)}</td><td>${esc(e.prod)}</td><td class="r">${p?fmt(e.qty).replace(/\.00$/,'')+' '+esc(e.unit):''}</td><td>${esc(e.cur)}</td><td class="r">${p?fmt(e.price):''}</td><td class="r">${p?fmt(e.tva):''}</td><td class="r">${d?fmt(e.amount):''}</td><td class="r">${d?'':fmt(e.amount)}</td><td class="r"><b>${fmt(run[e.cur])}</b></td><td><span class="actions"><button class="more" aria-label="Transaction actions" onclick="toggleMenu(event,'m_${e.id}')">＋</button><span class="menu" id="m_${e.id}"><button onclick="editEntry('${e.id}')">Edit</button><button onclick="delEntry('${e.id}')">Delete</button></span></span></td></tr>`}).join('');
+  $('led').innerHTML=list.length?`<table><thead><tr><th>Date</th><th>Type</th><th>Invoice / ref</th><th>Category</th><th>Product</th><th class="r">Qty</th><th>Cur</th><th class="r">Price</th><th class="r">TVA</th><th class="r">Debit</th><th class="r">Payment / credit</th><th class="r">Balance</th><th></th></tr></thead><tbody>${rows}</tbody></table>`:'<div class="empty">No entries yet. Fill the form above and save the first one.</div>';
   const b=$('bal');if(b){const x=bal(S.sel);b.innerHTML=cs(x);b.className=Object.keys(x).some(c=>Math.abs(x[c])>0.004)?'':'z'}
 }
 
@@ -323,8 +293,8 @@ const purch=c=>S.entries.filter(e=>e.type==='purchase'&&e.cat===c);
 function addCat(){const n=ensure(S.cats,$('nc').value);if(!n)return;S.csel=n;$('nc').value='';save();renderCat()}
 function pickCat(c){S.csel=c;save();renderCat()}
 function renameCat(v){v=v.trim();const o=S.csel;if(!v||v===o)return;if(S.cats.some(x=>x.toLowerCase()===v.toLowerCase()&&x!==o)){renderCat();return}
-  S.cats=S.cats.map(c=>c===o?v:c);S.entries.forEach(e=>{if(e.cat===o)e.cat=v});S.productByCat=S.productByCat||{};if(S.productByCat[o]){S.productByCat[v]=[...new Set([...(S.productByCat[v]||[]),...S.productByCat[o]])];delete S.productByCat[o]}S.csel=v;save();renderCat()}
-function delCat(){const o=S.csel;S.cats=S.cats.filter(c=>c!==o);S.entries.forEach(e=>{if(e.cat===o)e.cat=''});if(S.productByCat)delete S.productByCat[o];S.csel='';save();renderCat()}
+  S.cats=S.cats.map(c=>c===o?v:c);S.entries.forEach(e=>{if(e.cat===o)e.cat=v});S.csel=v;save();renderCat()}
+function delCat(){const o=S.csel;S.cats=S.cats.filter(c=>c!==o);S.entries.forEach(e=>{if(e.cat===o)e.cat=''});S.csel='';save();renderCat()}
 function renderCat(){
   if(S.csel&&!S.cats.includes(S.csel))S.csel='';
   const c=S.csel,fs=window.cf||'',query=(window.catQuery||'').trim().toLowerCase();
@@ -341,36 +311,16 @@ function renderCat(){
   const sorted=rows;
   const wasSearching=document.activeElement&&document.activeElement.id==='purchaseSearch';
   const cursor=wasSearching?document.activeElement.selectionStart:null;
-  $('cr').innerHTML=`<div class="top"><div>${c?`<input class="name" value="${esc(c)}" onchange="renameCat(this.value)" aria-label="Category name"> <button class="del" onclick="arm(this,delCat)">Delete category</button>`:'<h2 class="t">All Categories</h2>'}</div><div class="big"><span class="mut">Total purchased (incl. TVA)</span><div>${tot(all)}</div></div></div>
+  $('cr').innerHTML=`<div class="top"><div>${c?`<h2 class="t">${esc(c)}</h2>`:'<h2 class="t">All Categories</h2>'}</div><div class="big"><span class="mut">Total purchased (incl. TVA)</span><div>${tot(all)}</div></div></div>
 <label>Show supplier</label><select onchange="window.cf=this.value;renderCat()"><option value="">All suppliers</option>${S.suppliers.map(s=>`<option value="${s.id}" ${s.id===fs?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
 ${by.length?`<h3>Total by supplier</h3><div class="wrap" style="margin-top:0"><table style="min-width:0">${by.map(x=>`<tr><td>${esc(x.s.name)}</td><td class="r">${cs(x.t)}</td></tr>`).join('')}<tr><td><b>All suppliers</b></td><td class="r"><b>${tot(all)}</b></td></tr></table></div>`:''}
 <h3>Purchases</h3><div class="filter-search"><input id="purchaseSearch" placeholder="Search category, product, invoice, unit or currency..." value="${esc(window.catQuery||'')}" oninput="window.catQuery=this.value;renderCat()"></div><div class="wrap" style="margin-top:0">${sorted.length?`<table><thead><tr><th>Supplier</th><th>Category</th><th>Product</th><th class="r">Qty</th><th>Unit</th><th>Cur</th><th class="r">Price</th><th class="r">TVA</th><th class="r">Total with TVA</th></tr></thead><tbody>${sorted.map(r=>{const e=r.e;return `<tr><td>${esc(sn(e.sid))}</td><td>${esc(e.cat)}</td><td>${esc(e.prod)}${r.n>1?` <span class="mut">(${r.n} entries)</span>`:''}</td><td class="r">${fmt(r.qty).replace(/\.00$/,'')}</td><td>${esc(e.unit)}</td><td>${esc(e.cur)}</td><td class="r">${fmt(e.price)}</td><td class="r">${fmt(r.tva)}</td><td class="r"><b>${fmt(r.amt)}</b></td></tr>`}).join('')}</tbody></table>`:'<div class="empty">No purchases to show.</div>'}</div>`;
   if(wasSearching){const si=$('purchaseSearch');si.focus();if(cursor!==null)si.setSelectionRange(cursor,cursor)}
 }
 
-/* ---------- Excel workbooks ---------- */
-function excelReady(){if(!window.XLSX){alert('Excel export library did not load. Check your internet connection and try again.');return false}return true}
-function safeSheetName(name,used){let base=String(name||'Sheet').replace(/[\\/?*\[\]:]/g,' ').trim().slice(0,31)||'Sheet';let out=base,n=2;while(used.has(out.toLowerCase())){const suffix=' '+n++;out=base.slice(0,31-suffix.length)+suffix}used.add(out.toLowerCase());return out}
-function addSheet(wb,rows,name,used){const ws=XLSX.utils.json_to_sheet(rows);ws['!cols']=rows.length?Object.keys(rows[0]).map(k=>({wch:Math.min(32,Math.max(12,k.length+3))})):[];XLSX.utils.book_append_sheet(wb,ws,safeSheetName(name,used))}
-function entryExcelRow(e){return {'Date':fd(e.date),'Entry Type':TL[e.type]||e.type,'Invoice / Reference':e.inv||'','Category':e.cat||'','Product':e.prod||'','Quantity':e.qty??'','Unit':e.unit||'','Currency':e.cur||'','Price':e.price??'','TVA':e.tva??'','Debit':isDr(e)?e.amount:'','Payment / Credit':isDr(e)?'':e.amount,'Amount':e.amount,...Object.fromEntries((S.customFields||[]).map(k=>[k,(e.customFields||{})[k]||'']))}}
-function exportExcel(){if(!excelReady())return;const wb=XLSX.utils.book_new(),used=new Set();
-  if(page===1){
-    const summary=S.suppliers.map(s=>{const balances=bal(s.id);return {'Supplier':s.name,'Transactions':S.entries.filter(e=>e.sid===s.id).length,...Object.fromEntries(Object.entries(balances).map(([cur,amount])=>['Balance '+cur,amount]))}});
-    addSheet(wb,summary,'Suppliers',used);
-    S.suppliers.forEach(s=>{const rows=S.entries.filter(e=>e.sid===s.id).sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map(entryExcelRow);addSheet(wb,rows.length?rows:[{'Supplier':s.name,'Information':'No transactions'}],s.name,used)});
-    XLSX.writeFile(wb,'Supplier-Ledger.xlsx');
-  }else{
-    const purchases=S.entries.filter(e=>e.type==='purchase');
-    const summary=S.cats.map(c=>{const rows=purchases.filter(e=>e.cat===c);const totals={};rows.forEach(e=>totals[e.cur]=(totals[e.cur]||0)+Number(e.amount||0));return {'Category':c,'Purchase Entries':rows.length,...Object.fromEntries(Object.entries(totals).map(([cur,amount])=>['Total '+cur,amount]))}});
-    addSheet(wb,summary,'All Categories',used);
-    S.cats.forEach(c=>{const rows=purchases.filter(e=>e.cat===c).sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map(e=>({'Supplier':(S.suppliers.find(s=>s.id===e.sid)||{}).name||'',...entryExcelRow(e)}));addSheet(wb,rows.length?rows:[{'Category':c,'Information':'No purchases'}],c,used)});
-    XLSX.writeFile(wb,'Purchases-by-Category.xlsx');
-  }
-}
-
 /* ---------- Backup ---------- */
 function exp(){const a=document.createElement('a');a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(S));a.download='supplier-ledger-backup.json';a.click()}
 function imp(i){const f=i.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.suppliers||!d.entries)throw 0;S=d;normalizeState();save();hasForm=false;go(page)}catch(e){alert('That file is not a valid backup.')}};r.readAsText(f)}
-document.addEventListener('click',e=>{document.querySelectorAll('.search-select.open').forEach(box=>{if(!box.contains(e.target))box.classList.remove('open')})});
+document.addEventListener('click',e=>{document.querySelectorAll('.search-select.open').forEach(box=>{if(!box.contains(e.target))box.classList.remove('open')});document.querySelectorAll('.menu.open').forEach(m=>{if(!m.parentElement.contains(e.target))m.classList.remove('open')})});
 initShared();
 </script></body></html>
