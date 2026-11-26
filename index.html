@@ -3,9 +3,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Supplier Ledger</title>
 <style>
-:root{--bg:#eef4fb;--card:#fff;--ink:#1e2d3d;--mut:#5f7287;--line:#d5e0ec;--acc:#2f6db5;--on:#fff;--warn:#b0402c;--row:#f0f6fd;--in:#fff;--head:#e4eef9;--payBg:#e6f5ec;--payInk:#1e7b45;--retBg:#fdf0dc;--retInk:#a85a05;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1823;--card:#16222f;--ink:#e3ecf5;--mut:#92a6bb;--line:#26364a;--acc:#6aa5e8;--on:#08141f;--warn:#ff9a7a;--row:#1b2a3a;--in:#0f1823;--head:#1f3045;--payBg:#173126;--payInk:#6fd39b;--retBg:#38291a;--retInk:#f0b46a;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#0f1823;--card:#16222f;--ink:#e3ecf5;--mut:#92a6bb;--line:#26364a;--acc:#6aa5e8;--on:#08141f;--warn:#ff9a7a;--row:#1b2a3a;--in:#0f1823;--head:#1f3045;--payBg:#173126;--payInk:#6fd39b;--retBg:#38291a;--retInk:#f0b46a;color-scheme:dark}
+:root{--bg:#eef4fb;--card:#fff;--ink:#1e2d3d;--mut:#5f7287;--line:#d5e0ec;--acc:#2f6db5;--on:#fff;--warn:#b0402c;--row:#f0f6fd;--in:#fff;--head:#e4eef9;--payBg:#e6f5ec;--payInk:#1e7b45;--retBg:#fff5c7;--retInk:#8a6a00;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1823;--card:#16222f;--ink:#e3ecf5;--mut:#92a6bb;--line:#26364a;--acc:#6aa5e8;--on:#08141f;--warn:#ff9a7a;--row:#1b2a3a;--in:#0f1823;--head:#1f3045;--payBg:#173126;--payInk:#6fd39b;--retBg:#3a3318;--retInk:#f2d36b;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1823;--card:#16222f;--ink:#e3ecf5;--mut:#92a6bb;--line:#26364a;--acc:#6aa5e8;--on:#08141f;--warn:#ff9a7a;--row:#1b2a3a;--in:#0f1823;--head:#1f3045;--payBg:#173126;--payInk:#6fd39b;--retBg:#3a3318;--retInk:#f2d36b;color-scheme:dark}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
@@ -38,7 +38,6 @@ label{display:block;color:var(--mut);font-size:12px;margin-bottom:3px}
 table{border-collapse:collapse;width:100%;min-width:760px}
 th{color:var(--ink);background:var(--head);font-weight:600;font-size:12px;text-align:left;padding:8px 8px;border-bottom:2px solid var(--acc);white-space:nowrap}
 td{padding:9px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
-tbody tr:nth-child(even) td{background:var(--row)}
 tbody tr.pay td{background:var(--payBg)}tbody tr.ret td{background:var(--retBg)}
 tbody tr.pay td.ty{color:var(--payInk);font-weight:600}tbody tr.ret td.ty{color:var(--retInk);font-weight:600}
 .r{text-align:right}.mut{color:var(--mut)}
@@ -50,13 +49,15 @@ h3{margin:18px 0 6px;font-size:15px}
 .dd{position:absolute;z-index:20;left:0;right:0;top:100%;margin-top:2px;min-width:170px;max-height:220px;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:6px;box-shadow:0 8px 22px rgba(0,0,0,.2)}
 .dd .o{padding:8px 10px;cursor:pointer}.dd .o:hover{background:var(--row)}.dd .nw{color:var(--acc);font-weight:600}.search-select{position:relative}.search-select input{width:100%}.search-select .dd{display:none}.search-select.open .dd{display:block}.search-select .dd .empty-option{padding:9px 10px;color:var(--mut)}.filter-search{margin:8px 0 10px}.filter-search input{max-width:100%}
 h2.t{margin:0;font-size:20px}
+.ui{display:flex;align-items:center;gap:6px}.zoom{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:6px;background:var(--in);overflow:hidden}.zoom button{border:0;border-radius:0;padding:6px 10px;background:transparent;font-weight:700}.zoom button:hover,.themebtn:hover{background:var(--row)}.zoom .zp{min-width:54px;text-align:center;font-size:12px;font-weight:600;padding:6px 4px}.themebtn{width:34px;height:34px;padding:0;border-radius:50%;font-size:17px;line-height:1;display:inline-flex;align-items:center;justify-content:center}
 @media(max-width:760px){main{grid-template-columns:1fr}}
 </style></head><body>
 <header><h1>Supplier Ledger</h1>
 <div class="tabs"><button class="tab on" id="t1" onclick="go(1)">Suppliers</button><button class="tab" id="t2" onclick="go(2)">Purchases by category</button></div>
 <span class="sp"></span>
-<button class="pri" onclick="downloadExcel()">Download Excel</button><button onclick="exp()">Export backup</button><button onclick="document.getElementById('imp').click()">Import backup</button>
+<button class="pri" onclick="downloadExcel()" title="Downloads the Excel workbook for the tab you are on">Download Excel</button><button onclick="exp()">Export backup</button><button onclick="document.getElementById('imp').click()">Import backup</button>
 <input type="file" id="imp" accept=".json" hidden onchange="imp(this)">
+<div class="ui"><div class="zoom" title="Zoom"><button onclick="setZoom(-10)" aria-label="Zoom out">−</button><button class="zp" id="zp" onclick="setZoom(0)" title="Reset zoom">100%</button><button onclick="setZoom(10)" aria-label="Zoom in">＋</button></div><button class="themebtn" id="themebtn" onclick="toggleTheme()" aria-label="Toggle light/dark theme" title="Toggle light/dark theme">☾</button></div>
 </header>
 <main id="p1">
 <div class="card"><div id="sl"></div><div class="add"><input id="ns" placeholder="New supplier name" onkeydown="if(event.key==='Enter')addSup()"><button class="pri" onclick="addSup()">Add</button></div></div>
@@ -69,6 +70,18 @@ h2.t{margin:0;font-size:20px}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <script>
+/* ---------- Zoom & theme (device-only, not synced) ---------- */
+const UIK='supplier-ledger-ui';
+let UI={zoom:100,theme:''};
+try{UI=Object.assign(UI,JSON.parse(localStorage.getItem(UIK))||{})}catch(e){}
+const saveUI=()=>{try{localStorage.setItem(UIK,JSON.stringify(UI))}catch(e){}};
+function applyZoom(){UI.zoom=Math.min(200,Math.max(50,UI.zoom));document.body.style.zoom=UI.zoom/100;const z=document.getElementById('zp');if(z)z.textContent=UI.zoom+'%'}
+function setZoom(d){UI.zoom=d===0?100:UI.zoom+d;applyZoom();saveUI()}
+function curTheme(){return UI.theme||(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')}
+function applyTheme(){const t=curTheme();document.documentElement.setAttribute('data-theme',t);const b=document.getElementById('themebtn');if(b){b.textContent=t==='dark'?'☀':'☾';b.title=t==='dark'?'Switch to light theme':'Switch to dark theme'}}
+function toggleTheme(){UI.theme=curTheme()==='dark'?'light':'dark';applyTheme();saveUI()}
+applyZoom();applyTheme();
+
 const KEY='supplier-ledger-v1';
 const SUPABASE_URL='https://tylwxpuarmkdbrhgiztb.supabase.co';
 const SUPABASE_KEY='sb_publishable_B6j8kX4ZSa55zidjzQPsqw_Yr9Pn34e';
@@ -286,7 +299,7 @@ function renderLedger(){
   const list=S.entries.map((e,i)=>({e,i})).filter(x=>x.e.sid===S.sel).sort((a,b)=>a.e.date<b.e.date?-1:a.e.date>b.e.date?1:a.i-b.i).map(x=>x.e);
   const run={};
   const rows=list.map(e=>{run[e.cur]=(run[e.cur]||0)+(isDr(e)?e.amount:-e.amount);const p=e.type==='purchase'||e.type==='return',d=isDr(e);
-    const rc=e.type==='return'?'ret':(!d?'pay':'');
+    const rc=e.type==='payment'?'pay':(['return','debitadj','creditadj'].includes(e.type)?'ret':'');
     return `<tr class="${rc}"><td>${fd(e.date)}</td><td class="ty">${TL[e.type]||e.type}</td><td>${esc(e.inv)}</td><td>${esc(e.cat)}</td><td>${esc(e.prod)}</td><td class="r">${p?fmt(e.qty).replace(/\.00$/,''):''}</td><td>${p?esc(e.unit):''}</td><td>${esc(e.cur)}</td><td class="r">${p?fmt(e.price):''}</td><td class="r">${p?fmt(e.tva):''}</td><td class="r">${d?fmt(e.amount):''}</td><td class="r">${d?'':fmt(e.amount)}</td><td class="r"><b>${fmt(run[e.cur])}</b></td><td><span class="actions"><button class="more" aria-label="Transaction actions" onclick="toggleMenu(event,'m_${e.id}')">＋</button><span class="menu" id="m_${e.id}"><button onclick="editEntry('${e.id}')">Edit</button><button onclick="delEntry('${e.id}')">Delete</button></span></span></td></tr>`}).join('');
   $('led').innerHTML=list.length?`<table><thead><tr><th>Date</th><th>Type</th><th>Invoice / ref</th><th>Category</th><th>Product</th><th class="r">Quantity</th><th>Unit</th><th>Cur</th><th class="r">Price</th><th class="r">TVA</th><th class="r">Debit</th><th class="r">Payment / credit</th><th class="r">Balance</th><th></th></tr></thead><tbody>${rows}</tbody></table>`:'<div class="empty">No entries yet. Fill the form above and save the first one.</div>';
   const b=$('bal');if(b){const x=bal(S.sel);b.innerHTML=cs(x);b.className=Object.keys(x).some(c=>Math.abs(x[c])>0.004)?'':'z'}
@@ -322,54 +335,128 @@ function renderCat(){
 
 
 /* ---------- Excel download ---------- */
-async function downloadExcel(){
-  if(!window.ExcelJS){alert('The Excel library could not load. Check your internet connection and try again.');return}
-  if(!S.entries.length){alert('There are no transactions to export yet.');return}
-  const wb=new ExcelJS.Workbook();wb.creator='Supplier Ledger';wb.created=new Date();
-  const ws=wb.addWorksheet('Transactions',{views:[{state:'frozen',ySplit:1}]});
-  const cols=[
-    ['Date',12,'dd-mm-yyyy','center'],['Supplier',24,null,'left'],['Type',18,null,'left'],['Invoice / Ref',16,null,'left'],
-    ['Category',18,null,'left'],['Product',28,null,'left'],['Quantity',12,'#,##0.##','right'],['Unit',9,null,'center'],
-    ['Currency',10,null,'center'],['Unit Price',15,'#,##0.00','right'],['TVA %',8,'0.##','right'],['TVA Amount',15,'#,##0.00','right'],
-    ['Transport',14,'#,##0.00','right'],['Debit',16,'#,##0.00','right'],['Payment / Credit',17,'#,##0.00','right'],['Balance',17,'#,##0.00;[Red]-#,##0.00','right']
-  ];
+const XL={blue:'FF2F6DB5',ink:'FF1E2D3D',line:'FFD5E0EC',white:'FFFFFFFF',green:'FFE6F5EC',greenInk:'FF1E7B45',yel:'FFFFF5C7',yelInk:'FF8A6A00'};
+const xlKind=e=>e.type==='payment'?'pay':(['return','debitadj','creditadj'].includes(e.type)?'yel':'white');
+const xlDate=d=>{if(!d)return null;const a=d.split('-').map(Number);return new Date(Date.UTC(a[0],a[1]-1,a[2]))};
+const xlNames=new Set();
+function xlName(n){let b=String(n||'Sheet').replace(/[\\\/\?\*\[\]:]/g,' ').trim().slice(0,31)||'Sheet',x=b,i=2;while(xlNames.has(x.toLowerCase())){const t=' ('+i++ +')';x=b.slice(0,31-t.length)+t}xlNames.add(x.toLowerCase());return x}
+function xlTable(wb,name,cols,rows,typeCol,boldCol){
+  const ws=wb.addWorksheet(name,{views:[{state:'frozen',ySplit:1}]});
   ws.columns=cols.map(c=>({header:c[0],width:c[1]}));
-  const thin={style:'thin',color:{argb:'FFD5E0EC'}},border={top:thin,left:thin,bottom:thin,right:thin};
+  const th={style:'thin',color:{argb:XL.line}},bd={top:th,left:th,bottom:th,right:th};
   const hr=ws.getRow(1);hr.height=26;
-  hr.eachCell((c,n)=>{c.font={bold:true,color:{argb:'FFFFFFFF'},size:11,name:'Calibri'};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF2F6DB5'}};c.alignment={vertical:'middle',horizontal:cols[n-1][3]==='right'?'right':'center',wrapText:true};c.border=border});
-  const sn=id=>(S.suppliers.find(s=>s.id===id)||{name:'(deleted)'}).name;
-  const list=S.entries.map((e,i)=>({e,i})).sort((a,b)=>sn(a.e.sid).localeCompare(sn(b.e.sid))||(a.e.date<b.e.date?-1:a.e.date>b.e.date?1:a.i-b.i)).map(x=>x.e);
-  const run={};let k=0;
-  list.forEach(e=>{
-    const d=isDr(e),p=e.type==='purchase'||e.type==='return',rk=e.sid+'|'+e.cur;
-    run[rk]=(run[rk]||0)+(d?e.amount:-e.amount);
-    const dt=e.date?e.date.split('-').map(Number):null;
-    const row=ws.addRow([
-      dt?new Date(Date.UTC(dt[0],dt[1]-1,dt[2])):null,sn(e.sid),TL[e.type]||e.type,e.inv||'',e.cat||'',e.prod||'',
-      p?e.qty:null,p?(e.unit||''):'',e.cur||'',p?e.price:null,p?e.tvaPct:null,p?e.tva:null,p?(e.transport||0):null,
-      d?e.amount:null,d?null:e.amount,run[rk]
-    ]);
-    const bg=e.type==='return'?'FFFDF0DC':(!d?'FFE6F5EC':(k%2?'FFF0F6FD':'FFFFFFFF'));
-    const ink=e.type==='return'?'FFA85A05':'FF1E7B45';
+  hr.eachCell((c,n)=>{c.font={bold:true,color:{argb:'FFFFFFFF'},size:11,name:'Calibri'};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:XL.blue}};c.alignment={vertical:'middle',horizontal:cols[n-1][3]==='right'?'right':'center',wrapText:true};c.border=bd});
+  rows.forEach(r=>{
+    const row=ws.addRow(r.v);
+    const bg=r.kind==='pay'?XL.green:r.kind==='yel'?XL.yel:XL.white;
     row.eachCell({includeEmpty:true},(c,n)=>{
-      c.fill={type:'pattern',pattern:'solid',fgColor:{argb:bg}};c.border=border;
-      c.font={name:'Calibri',size:11,color:{argb:'FF1E2D3D'}};
+      c.fill={type:'pattern',pattern:'solid',fgColor:{argb:bg}};c.border=bd;
+      c.font={name:'Calibri',size:11,color:{argb:XL.ink}};
       c.alignment={vertical:'middle',horizontal:cols[n-1][3]};
       if(cols[n-1][2])c.numFmt=cols[n-1][2];
     });
-    const tc=row.getCell(3);tc.font={name:'Calibri',size:11,bold:true,color:{argb:d?'FF2F6DB5':ink}};
-    row.getCell(16).font={name:'Calibri',size:11,bold:true,color:{argb:'FF1E2D3D'}};
-    k++;
+    if(typeCol&&r.kind!=='white')row.getCell(typeCol).font={name:'Calibri',size:11,bold:true,color:{argb:r.kind==='pay'?XL.greenInk:XL.yelInk}};
+    if(boldCol)row.getCell(boldCol).font={name:'Calibri',size:11,bold:true,color:{argb:XL.ink}};
+    if(r.link){const c=row.getCell(r.link.col);c.value={text:String(c.value),hyperlink:r.link.ref};c.font={name:'Calibri',size:11,underline:true,color:{argb:XL.blue}}}
   });
   ws.autoFilter={from:{row:1,column:1},to:{row:1,column:cols.length}};
   ws.pageSetup={orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0};
+  return ws;
+}
+function xlInstructions(wb,title,lines){
+  const ws=wb.addWorksheet(xlName('Instructions'));
+  ws.getColumn(1).width=110;
+  const t=ws.addRow([title]);t.height=28;t.getCell(1).font={bold:true,size:15,color:{argb:XL.blue},name:'Calibri'};
+  ws.addRow(['']);
+  lines.forEach(l=>{const r=ws.addRow([l]);const h=/^[A-Z ]+:?$/.test(l);r.getCell(1).font={name:'Calibri',size:11,bold:h,color:{argb:XL.ink}};r.getCell(1).alignment={wrapText:true,vertical:'top'}});
+  const key=[['White row','Purchase',XL.white,XL.ink],['Green row','Payment',XL.green,XL.greenInk],['Yellow row','Return, Debit Adjustment or Credit Adjustment',XL.yel,XL.yelInk]];
+  ws.addRow(['']);
+  key.forEach(k=>{const r=ws.addRow([k[0]+'  =  '+k[1]]);const c=r.getCell(1);c.fill={type:'pattern',pattern:'solid',fgColor:{argb:k[2]}};c.font={name:'Calibri',size:11,bold:true,color:{argb:k[3]}};c.border={top:{style:'thin',color:{argb:XL.line}},bottom:{style:'thin',color:{argb:XL.line}},left:{style:'thin',color:{argb:XL.line}},right:{style:'thin',color:{argb:XL.line}}}});
+  ws.views=[{showGridLines:false}];
+}
+async function xlSave(wb,base){
   try{
     const buf=await wb.xlsx.writeBuffer();
     const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-    a.download='supplier-ledger-'+new Date().toISOString().slice(0,10)+'.xlsx';
+    a.download=base+'-'+new Date().toISOString().slice(0,10)+'.xlsx';
     document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000);
   }catch(err){console.error(err);alert('Could not create the Excel file.')}
+}
+function downloadExcel(){
+  if(!window.ExcelJS){alert('The Excel library could not load. Check your internet connection and try again.');return}
+  if(!S.entries.length){alert('There are no transactions to export yet.');return}
+  page===2?downloadCategoryExcel():downloadSupplierExcel();
+}
+const NF='#,##0.00',BF='#,##0.00;[Red]-#,##0.00',QF='#,##0.##';
+async function downloadSupplierExcel(){
+  xlNames.clear();xlNames.add('index');xlNames.add('instructions');
+  const wb=new ExcelJS.Workbook();wb.creator='Supplier Ledger';wb.created=new Date();
+  const sups=[...S.suppliers].sort((a,b)=>a.name.localeCompare(b.name));
+  const idxCols=[['Supplier',34,null,'left'],['Currency',12,null,'center'],['Balance Owed',20,BF,'right'],['Transactions',14,'0','center']];
+  const idxRows=[],sheets=[];
+  const cols=[['Date',12,'dd-mm-yyyy','center'],['Type',18,null,'left'],['Invoice / Ref',16,null,'left'],['Category',18,null,'left'],['Product',28,null,'left'],['Quantity',12,QF,'right'],['Unit',9,null,'center'],['Currency',10,null,'center'],['Unit Price',15,NF,'right'],['TVA %',8,'0.##','right'],['TVA Amount',15,NF,'right'],['Transport',14,NF,'right'],['Debit',16,NF,'right'],['Payment / Credit',17,NF,'right'],['Balance',17,BF,'right']];
+  sups.forEach(s=>{
+    const list=S.entries.map((e,i)=>({e,i})).filter(x=>x.e.sid===s.id).sort((a,b)=>a.e.date<b.e.date?-1:a.e.date>b.e.date?1:a.i-b.i).map(x=>x.e);
+    const sheet=xlName(s.name),run={},cnt={};
+    const rows=list.map(e=>{
+      const d=isDr(e),p=e.type==='purchase'||e.type==='return';
+      run[e.cur]=(run[e.cur]||0)+(d?e.amount:-e.amount);cnt[e.cur]=(cnt[e.cur]||0)+1;
+      return {kind:xlKind(e),v:[xlDate(e.date),TL[e.type]||e.type,e.inv||'',e.cat||'',e.prod||'',p?e.qty:null,p?(e.unit||''):'',e.cur||'',p?e.price:null,p?e.tvaPct:null,p?e.tva:null,p?(e.transport||0):null,d?e.amount:null,d?null:e.amount,run[e.cur]]}
+    });
+    sheets.push([sheet,cols,rows]);
+    const link={col:1,ref:"#'"+sheet.replace(/'/g,"''")+"'!A1"};
+    const curs=Object.keys(run);
+    if(!curs.length)idxRows.push({kind:'white',link,v:[s.name,'—',0,0]});
+    else curs.forEach(c=>idxRows.push({kind:'white',link,v:[s.name,c,run[c],cnt[c]]}));
+  });
+  xlTable(wb,'Index',idxCols,idxRows,null,3);
+  sheets.forEach(x=>xlTable(wb,x[0],x[1],x[2],2,15));
+  xlInstructions(wb,'Supplier Ledger – Instructions',[
+    'ABOUT THIS FILE',
+    'This workbook was exported from the Supplier Ledger. The first sheet, Index, lists every supplier with the balance owed in each currency. After it comes one sheet per supplier containing all of that supplier’s transactions.',
+    '',
+    'HOW TO USE',
+    '• Click a supplier name on the Index sheet to jump straight to that supplier’s sheet.',
+    '• Every sheet has a filter on the heading row – click the small arrow on any heading to filter or sort.',
+    '• The heading row is frozen, so it stays visible while you scroll.',
+    '• Quantity and Unit are separate columns, so Quantity can be sorted and calculated as a number.',
+    '',
+    'BALANCES',
+    '• Balance Owed is the amount still owed to the supplier. Purchases and Debit Adjustments increase it; Payments, Returns and Credit Adjustments reduce it.',
+    '• The Balance column on each supplier sheet is a running balance per currency, in date order. Balances in different currencies are never added together.',
+    '• Note: if you sort or filter a sheet, the running Balance values stay as exported.',
+    '',
+    'ROW COLOURS'
+  ]);
+  await xlSave(wb,'supplier-ledger-suppliers');
+}
+async function downloadCategoryExcel(){
+  xlNames.clear();xlNames.add('instructions');
+  const wb=new ExcelJS.Workbook();wb.creator='Supplier Ledger';wb.created=new Date();
+  const sn=id=>(S.suppliers.find(s=>s.id===id)||{name:'(deleted)'}).name;
+  const purchases=S.entries.filter(e=>e.type==='purchase').sort((a,b)=>sn(a.sid).localeCompare(sn(b.sid))||(a.date<b.date?-1:a.date>b.date?1:0));
+  const cols=[['Date',12,'dd-mm-yyyy','center'],['Supplier',26,null,'left'],['Invoice / Ref',16,null,'left'],['Category',18,null,'left'],['Product',28,null,'left'],['Quantity',12,QF,'right'],['Unit',9,null,'center'],['Currency',10,null,'center'],['Unit Price',15,NF,'right'],['TVA %',8,'0.##','right'],['TVA Amount',15,NF,'right'],['Transport',14,NF,'right'],['Total with TVA',18,NF,'right']];
+  const mk=l=>l.map(e=>({kind:'white',v:[xlDate(e.date),sn(e.sid),e.inv||'',e.cat||'NO CATEGORY',e.prod||'',e.qty,e.unit||'',e.cur||'',e.price,e.tvaPct,e.tva,e.transport||0,e.amount]}));
+  const catOf=e=>e.cat||'NO CATEGORY';
+  const catList=[...S.cats];purchases.forEach(e=>{if(!catList.includes(catOf(e)))catList.push(catOf(e))});
+  xlTable(wb,xlName('All Categories'),cols,mk(purchases),null,13);
+  catList.forEach(c=>xlTable(wb,xlName(c),cols,mk(purchases.filter(e=>catOf(e)===c)),null,13));
+  xlInstructions(wb,'Purchases by Category – Instructions',[
+    'ABOUT THIS FILE',
+    'This workbook was exported from the Supplier Ledger. The first sheet, All Categories, contains every purchase. After it comes one sheet for each category (for example RAW MATERIAL) containing only that category’s purchases.',
+    '',
+    'HOW TO USE',
+    '• Every sheet has a filter on the heading row – click the small arrow on any heading to filter or sort, for example by Supplier or Product.',
+    '• The heading row is frozen, so it stays visible while you scroll.',
+    '• Quantity and Unit are separate columns, so Quantity can be sorted and calculated as a number.',
+    '• Total with TVA = Quantity × Unit Price + TVA Amount + Transport.',
+    '• Amounts in different currencies should not be added together – filter by Currency first.',
+    '• Categories with no purchases have a sheet with headings only.',
+    '',
+    'ROW COLOURS'
+  ]);
+  await xlSave(wb,'supplier-ledger-categories');
 }
 
 /* ---------- Backup ---------- */
