@@ -3,9 +3,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Supplier Ledger</title>
 <style>
-:root{--bg:#f3f5f4;--card:#fff;--ink:#16211f;--mut:#66756f;--line:#dde4e1;--acc:#0e7c7b;--on:#fff;--warn:#c2410c;--row:#f7faf9;--in:#fff;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121817;--card:#1a2321;--ink:#e8efed;--mut:#8fa09a;--line:#2a3633;--acc:#4fb3b1;--on:#0b1a19;--warn:#ff8a5c;--row:#1e2a27;--in:#121a19;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#121817;--card:#1a2321;--ink:#e8efed;--mut:#8fa09a;--line:#2a3633;--acc:#4fb3b1;--on:#0b1a19;--warn:#ff8a5c;--row:#1e2a27;--in:#121a19;color-scheme:dark}
+:root{--bg:#eef4fb;--card:#fff;--ink:#1e2d3d;--mut:#5f7287;--line:#d5e0ec;--acc:#2f6db5;--on:#fff;--warn:#b0402c;--row:#f0f6fd;--in:#fff;--head:#e4eef9;--payBg:#e6f5ec;--payInk:#1e7b45;--retBg:#fdf0dc;--retInk:#a85a05;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1823;--card:#16222f;--ink:#e3ecf5;--mut:#92a6bb;--line:#26364a;--acc:#6aa5e8;--on:#08141f;--warn:#ff9a7a;--row:#1b2a3a;--in:#0f1823;--head:#1f3045;--payBg:#173126;--payInk:#6fd39b;--retBg:#38291a;--retInk:#f0b46a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1823;--card:#16222f;--ink:#e3ecf5;--mut:#92a6bb;--line:#26364a;--acc:#6aa5e8;--on:#08141f;--warn:#ff9a7a;--row:#1b2a3a;--in:#0f1823;--head:#1f3045;--payBg:#173126;--payInk:#6fd39b;--retBg:#38291a;--retInk:#f0b46a;color-scheme:dark}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
@@ -36,9 +36,11 @@ label{display:block;color:var(--mut);font-size:12px;margin-bottom:3px}
 .msg{color:var(--warn);margin:6px 0 0;min-height:18px}
 .wrap{overflow-x:auto;margin-top:14px}
 table{border-collapse:collapse;width:100%;min-width:760px}
-th{color:var(--mut);font-weight:600;font-size:12px;text-align:left;padding:8px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--ink);background:var(--head);font-weight:600;font-size:12px;text-align:left;padding:8px 8px;border-bottom:2px solid var(--acc);white-space:nowrap}
 td{padding:9px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
-tr.pay td{background:var(--row)}
+tbody tr:nth-child(even) td{background:var(--row)}
+tbody tr.pay td{background:var(--payBg)}tbody tr.ret td{background:var(--retBg)}
+tbody tr.pay td.ty{color:var(--payInk);font-weight:600}tbody tr.ret td.ty{color:var(--retInk);font-weight:600}
 .r{text-align:right}.mut{color:var(--mut)}
 td button{padding:3px 8px;font-size:12px}
 h3{margin:18px 0 6px;font-size:15px}
@@ -53,7 +55,7 @@ h2.t{margin:0;font-size:20px}
 <header><h1>Supplier Ledger</h1>
 <div class="tabs"><button class="tab on" id="t1" onclick="go(1)">Suppliers</button><button class="tab" id="t2" onclick="go(2)">Purchases by category</button></div>
 <span class="sp"></span>
-<button onclick="exp()">Export backup</button><button onclick="document.getElementById('imp').click()">Import backup</button>
+<button class="pri" onclick="downloadExcel()">Download Excel</button><button onclick="exp()">Export backup</button><button onclick="document.getElementById('imp').click()">Import backup</button>
 <input type="file" id="imp" accept=".json" hidden onchange="imp(this)">
 </header>
 <main id="p1">
@@ -65,6 +67,7 @@ h2.t{margin:0;font-size:20px}
 <div class="card" id="cr"></div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <script>
 const KEY='supplier-ledger-v1';
 const SUPABASE_URL='https://tylwxpuarmkdbrhgiztb.supabase.co';
@@ -283,8 +286,9 @@ function renderLedger(){
   const list=S.entries.map((e,i)=>({e,i})).filter(x=>x.e.sid===S.sel).sort((a,b)=>a.e.date<b.e.date?-1:a.e.date>b.e.date?1:a.i-b.i).map(x=>x.e);
   const run={};
   const rows=list.map(e=>{run[e.cur]=(run[e.cur]||0)+(isDr(e)?e.amount:-e.amount);const p=e.type==='purchase'||e.type==='return',d=isDr(e);
-    return `<tr class="${d?'':'pay'}"><td>${fd(e.date)}</td><td>${TL[e.type]||e.type}</td><td>${esc(e.inv)}</td><td>${esc(e.cat)}</td><td>${esc(e.prod)}</td><td class="r">${p?fmt(e.qty).replace(/\.00$/,'')+' '+esc(e.unit):''}</td><td>${esc(e.cur)}</td><td class="r">${p?fmt(e.price):''}</td><td class="r">${p?fmt(e.tva):''}</td><td class="r">${d?fmt(e.amount):''}</td><td class="r">${d?'':fmt(e.amount)}</td><td class="r"><b>${fmt(run[e.cur])}</b></td><td><span class="actions"><button class="more" aria-label="Transaction actions" onclick="toggleMenu(event,'m_${e.id}')">＋</button><span class="menu" id="m_${e.id}"><button onclick="editEntry('${e.id}')">Edit</button><button onclick="delEntry('${e.id}')">Delete</button></span></span></td></tr>`}).join('');
-  $('led').innerHTML=list.length?`<table><thead><tr><th>Date</th><th>Type</th><th>Invoice / ref</th><th>Category</th><th>Product</th><th class="r">Qty</th><th>Cur</th><th class="r">Price</th><th class="r">TVA</th><th class="r">Debit</th><th class="r">Payment / credit</th><th class="r">Balance</th><th></th></tr></thead><tbody>${rows}</tbody></table>`:'<div class="empty">No entries yet. Fill the form above and save the first one.</div>';
+    const rc=e.type==='return'?'ret':(!d?'pay':'');
+    return `<tr class="${rc}"><td>${fd(e.date)}</td><td class="ty">${TL[e.type]||e.type}</td><td>${esc(e.inv)}</td><td>${esc(e.cat)}</td><td>${esc(e.prod)}</td><td class="r">${p?fmt(e.qty).replace(/\.00$/,''):''}</td><td>${p?esc(e.unit):''}</td><td>${esc(e.cur)}</td><td class="r">${p?fmt(e.price):''}</td><td class="r">${p?fmt(e.tva):''}</td><td class="r">${d?fmt(e.amount):''}</td><td class="r">${d?'':fmt(e.amount)}</td><td class="r"><b>${fmt(run[e.cur])}</b></td><td><span class="actions"><button class="more" aria-label="Transaction actions" onclick="toggleMenu(event,'m_${e.id}')">＋</button><span class="menu" id="m_${e.id}"><button onclick="editEntry('${e.id}')">Edit</button><button onclick="delEntry('${e.id}')">Delete</button></span></span></td></tr>`}).join('');
+  $('led').innerHTML=list.length?`<table><thead><tr><th>Date</th><th>Type</th><th>Invoice / ref</th><th>Category</th><th>Product</th><th class="r">Quantity</th><th>Unit</th><th>Cur</th><th class="r">Price</th><th class="r">TVA</th><th class="r">Debit</th><th class="r">Payment / credit</th><th class="r">Balance</th><th></th></tr></thead><tbody>${rows}</tbody></table>`:'<div class="empty">No entries yet. Fill the form above and save the first one.</div>';
   const b=$('bal');if(b){const x=bal(S.sel);b.innerHTML=cs(x);b.className=Object.keys(x).some(c=>Math.abs(x[c])>0.004)?'':'z'}
 }
 
@@ -304,18 +308,68 @@ function renderCat(){
   const sn=id=>(S.suppliers.find(s=>s.id===id)||{name:'(deleted)'}).name;
   const tot=l=>cs(sums(l,e=>e.amount));
   $('cl').innerHTML=`<div class="item ${!c?'on':''}" onclick="pickCat('')"><span>All Categories</span><b>${tot(allP)}</b></div>`+S.cats.map(k=>`<div class="item ${k===c?'on':''}" onclick="pickCat(this.dataset.c)" data-c="${esc(k)}"><span>${esc(k)}</span><b>${tot(purch(k))}</b></div>`).join('');
-  const by=S.suppliers.map(s=>({s,t:sums(all.filter(e=>e.sid===s.id),e=>e.amount)})).filter(x=>Object.keys(x.t).length);
   const g={};
   list.forEach(e=>{const k=[e.sid,(e.cat||'').toLowerCase(),(e.prod||'').toLowerCase(),(e.unit||'').toLowerCase(),e.price,e.cur].join('|');const r=g[k]||(g[k]={e,qty:0,tva:0,amt:0,n:0});r.qty+=e.qty;r.tva+=e.tva;r.amt+=e.amount;r.n++});
   const rows=Object.values(g).sort((a,b)=>sn(a.e.sid).localeCompare(sn(b.e.sid))||(a.e.cat||'').localeCompare(b.e.cat||'')||(a.e.prod||'').localeCompare(b.e.prod||''));
   const sorted=rows;
   const wasSearching=document.activeElement&&document.activeElement.id==='purchaseSearch';
   const cursor=wasSearching?document.activeElement.selectionStart:null;
-  $('cr').innerHTML=`<div class="top"><div>${c?`<h2 class="t">${esc(c)}</h2>`:'<h2 class="t">All Categories</h2>'}</div><div class="big"><span class="mut">Total purchased (incl. TVA)</span><div>${tot(all)}</div></div></div>
+  $('cr').innerHTML=`<div class="top"><div>${c?`<h2 class="t">${esc(c)}</h2>`:'<h2 class="t">All Categories</h2>'}</div></div>
 <label>Show supplier</label><select onchange="window.cf=this.value;renderCat()"><option value="">All suppliers</option>${S.suppliers.map(s=>`<option value="${s.id}" ${s.id===fs?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
-${by.length?`<h3>Total by supplier</h3><div class="wrap" style="margin-top:0"><table style="min-width:0">${by.map(x=>`<tr><td>${esc(x.s.name)}</td><td class="r">${cs(x.t)}</td></tr>`).join('')}<tr><td><b>All suppliers</b></td><td class="r"><b>${tot(all)}</b></td></tr></table></div>`:''}
-<h3>Purchases</h3><div class="filter-search"><input id="purchaseSearch" placeholder="Search category, product, invoice, unit or currency..." value="${esc(window.catQuery||'')}" oninput="window.catQuery=this.value;renderCat()"></div><div class="wrap" style="margin-top:0">${sorted.length?`<table><thead><tr><th>Supplier</th><th>Category</th><th>Product</th><th class="r">Qty</th><th>Unit</th><th>Cur</th><th class="r">Price</th><th class="r">TVA</th><th class="r">Total with TVA</th></tr></thead><tbody>${sorted.map(r=>{const e=r.e;return `<tr><td>${esc(sn(e.sid))}</td><td>${esc(e.cat)}</td><td>${esc(e.prod)}${r.n>1?` <span class="mut">(${r.n} entries)</span>`:''}</td><td class="r">${fmt(r.qty).replace(/\.00$/,'')}</td><td>${esc(e.unit)}</td><td>${esc(e.cur)}</td><td class="r">${fmt(e.price)}</td><td class="r">${fmt(r.tva)}</td><td class="r"><b>${fmt(r.amt)}</b></td></tr>`}).join('')}</tbody></table>`:'<div class="empty">No purchases to show.</div>'}</div>`;
+<h3>Purchases</h3><div class="filter-search"><input id="purchaseSearch" placeholder="Search category, product, invoice, unit or currency..." value="${esc(window.catQuery||'')}" oninput="window.catQuery=this.value;renderCat()"></div><div class="wrap" style="margin-top:0">${sorted.length?`<table><thead><tr><th>Supplier</th><th>Category</th><th>Product</th><th class="r">Quantity</th><th>Unit</th><th>Cur</th><th class="r">Price</th><th class="r">TVA</th><th class="r">Total with TVA</th></tr></thead><tbody>${sorted.map(r=>{const e=r.e;return `<tr><td>${esc(sn(e.sid))}</td><td>${esc(e.cat)}</td><td>${esc(e.prod)}${r.n>1?` <span class="mut">(${r.n} entries)</span>`:''}</td><td class="r">${fmt(r.qty).replace(/\.00$/,'')}</td><td>${esc(e.unit)}</td><td>${esc(e.cur)}</td><td class="r">${fmt(e.price)}</td><td class="r">${fmt(r.tva)}</td><td class="r"><b>${fmt(r.amt)}</b></td></tr>`}).join('')}</tbody></table>`:'<div class="empty">No purchases to show.</div>'}</div>`;
   if(wasSearching){const si=$('purchaseSearch');si.focus();if(cursor!==null)si.setSelectionRange(cursor,cursor)}
+}
+
+
+/* ---------- Excel download ---------- */
+async function downloadExcel(){
+  if(!window.ExcelJS){alert('The Excel library could not load. Check your internet connection and try again.');return}
+  if(!S.entries.length){alert('There are no transactions to export yet.');return}
+  const wb=new ExcelJS.Workbook();wb.creator='Supplier Ledger';wb.created=new Date();
+  const ws=wb.addWorksheet('Transactions',{views:[{state:'frozen',ySplit:1}]});
+  const cols=[
+    ['Date',12,'dd-mm-yyyy','center'],['Supplier',24,null,'left'],['Type',18,null,'left'],['Invoice / Ref',16,null,'left'],
+    ['Category',18,null,'left'],['Product',28,null,'left'],['Quantity',12,'#,##0.##','right'],['Unit',9,null,'center'],
+    ['Currency',10,null,'center'],['Unit Price',15,'#,##0.00','right'],['TVA %',8,'0.##','right'],['TVA Amount',15,'#,##0.00','right'],
+    ['Transport',14,'#,##0.00','right'],['Debit',16,'#,##0.00','right'],['Payment / Credit',17,'#,##0.00','right'],['Balance',17,'#,##0.00;[Red]-#,##0.00','right']
+  ];
+  ws.columns=cols.map(c=>({header:c[0],width:c[1]}));
+  const thin={style:'thin',color:{argb:'FFD5E0EC'}},border={top:thin,left:thin,bottom:thin,right:thin};
+  const hr=ws.getRow(1);hr.height=26;
+  hr.eachCell((c,n)=>{c.font={bold:true,color:{argb:'FFFFFFFF'},size:11,name:'Calibri'};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF2F6DB5'}};c.alignment={vertical:'middle',horizontal:cols[n-1][3]==='right'?'right':'center',wrapText:true};c.border=border});
+  const sn=id=>(S.suppliers.find(s=>s.id===id)||{name:'(deleted)'}).name;
+  const list=S.entries.map((e,i)=>({e,i})).sort((a,b)=>sn(a.e.sid).localeCompare(sn(b.e.sid))||(a.e.date<b.e.date?-1:a.e.date>b.e.date?1:a.i-b.i)).map(x=>x.e);
+  const run={};let k=0;
+  list.forEach(e=>{
+    const d=isDr(e),p=e.type==='purchase'||e.type==='return',rk=e.sid+'|'+e.cur;
+    run[rk]=(run[rk]||0)+(d?e.amount:-e.amount);
+    const dt=e.date?e.date.split('-').map(Number):null;
+    const row=ws.addRow([
+      dt?new Date(Date.UTC(dt[0],dt[1]-1,dt[2])):null,sn(e.sid),TL[e.type]||e.type,e.inv||'',e.cat||'',e.prod||'',
+      p?e.qty:null,p?(e.unit||''):'',e.cur||'',p?e.price:null,p?e.tvaPct:null,p?e.tva:null,p?(e.transport||0):null,
+      d?e.amount:null,d?null:e.amount,run[rk]
+    ]);
+    const bg=e.type==='return'?'FFFDF0DC':(!d?'FFE6F5EC':(k%2?'FFF0F6FD':'FFFFFFFF'));
+    const ink=e.type==='return'?'FFA85A05':'FF1E7B45';
+    row.eachCell({includeEmpty:true},(c,n)=>{
+      c.fill={type:'pattern',pattern:'solid',fgColor:{argb:bg}};c.border=border;
+      c.font={name:'Calibri',size:11,color:{argb:'FF1E2D3D'}};
+      c.alignment={vertical:'middle',horizontal:cols[n-1][3]};
+      if(cols[n-1][2])c.numFmt=cols[n-1][2];
+    });
+    const tc=row.getCell(3);tc.font={name:'Calibri',size:11,bold:true,color:{argb:d?'FF2F6DB5':ink}};
+    row.getCell(16).font={name:'Calibri',size:11,bold:true,color:{argb:'FF1E2D3D'}};
+    k++;
+  });
+  ws.autoFilter={from:{row:1,column:1},to:{row:1,column:cols.length}};
+  ws.pageSetup={orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0};
+  try{
+    const buf=await wb.xlsx.writeBuffer();
+    const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+    a.download='supplier-ledger-'+new Date().toISOString().slice(0,10)+'.xlsx';
+    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+  }catch(err){console.error(err);alert('Could not create the Excel file.')}
 }
 
 /* ---------- Backup ---------- */
