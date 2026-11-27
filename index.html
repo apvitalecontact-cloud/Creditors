@@ -289,7 +289,23 @@ function renderSup(){
 <div class="form-actions"><button id="fcancel" onclick="cancelEdit()" hidden>Cancel</button><button class="pri" id="fsave" onclick="saveEntry()">Save entry</button></div>
 </div></div><p class="pre" id="pre" ${hasForm?'':'hidden'}></p><p class="msg" id="msg" ${hasForm?'':'hidden'}></p>
 <div class="ledbar"><input id="ledSearch" placeholder="Search date, type, invoice, category, product, unit, amount..." value="${esc(window.ledQuery||'')}" oninput="window.ledQuery=this.value;renderLedger()"><button class="pri" id="filtBtn" onclick="openFilter()"></button><button id="ledClear" onclick="ledClear()" hidden>Clear</button></div><div class="wrap" id="led" style="margin-top:10px"></div>`;
-  ['cat','unit','prod','cur'].forEach(fill);$('fdte').value=new Date().toISOString().slice(0,10);typ();renderLedger();renderSupList();
+  ['cat','unit','prod','cur'].forEach(fill);applySupDefaults(s.id);$('fdte').value=new Date().toISOString().slice(0,10);typ();renderLedger();renderSupList();
+}
+/* Per-supplier defaults: currency & TVA follow the last entry saved for that supplier */
+function supDefaults(sid){
+  const l=S.entries.filter(e=>e.sid===sid);let cur=null,tva=null;
+  for(let i=l.length-1;i>=0;i--){
+    const e=l[i];
+    if(cur===null&&e.cur)cur=e.cur;
+    if(tva===null&&(e.type==='purchase'||e.type==='return')&&e.tvaPct!==undefined&&e.tvaPct!==null)tva=e.tvaPct;
+    if(cur!==null&&tva!==null)break;
+  }
+  return {cur,tva};
+}
+function applySupDefaults(sid){
+  const d=supDefaults(sid);
+  if(d.cur)setv('cur',d.cur);
+  if(d.tva!==null)$('ftva').value=d.tva;
 }
 function toggleEntry(){hasForm=!hasForm;$('entryPanel').hidden=!hasForm;['formHead','pre','msg'].forEach(i=>{const x=$(i);if(x)x.hidden=!hasForm});const b=document.querySelector('.top .pri');if(b)b.textContent=hasForm?'− Close Entry':'＋ Add Entry';if(hasForm)$('fdte').focus()}
 function toggleMenu(ev,id){ev.stopPropagation();document.querySelectorAll('.menu.open').forEach(m=>{if(m.id!==id)m.classList.remove('open')});$(id).classList.toggle('open')}
