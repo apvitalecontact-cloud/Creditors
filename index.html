@@ -9,14 +9,14 @@
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
-header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line);background:var(--card)}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line);background:var(--card)}
 h1{font-size:18px;margin:0 12px 0 0}
 .tabs{display:flex;gap:6px}
 .tab,button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--in);color:var(--ink);padding:7px 12px;border-radius:6px}
 .tab.on,button.pri{background:var(--acc);color:var(--on);border-color:var(--acc);font-weight:600}
 button.del{color:var(--warn)}
 .sp{flex:1}
-main{display:grid;grid-template-columns:270px 1fr;gap:16px;padding:16px 20px;align-items:start}
+main{display:grid;grid-template-columns:minmax(230px,300px) minmax(0,1fr);gap:16px;padding:16px 20px;align-items:start;max-width:1800px;margin:0 auto;width:100%}
 .card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px}
 .item{display:flex;justify-content:space-between;gap:8px;padding:9px 10px;border:1px solid var(--line);border-radius:6px;margin-bottom:7px;cursor:pointer;background:var(--in)}
 .item.on{border-color:var(--acc);box-shadow:inset 3px 0 0 var(--acc)}
@@ -49,15 +49,16 @@ h3{margin:18px 0 6px;font-size:15px}
 .dd{position:absolute;z-index:20;left:0;right:0;top:100%;margin-top:2px;min-width:170px;max-height:220px;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:6px;box-shadow:0 8px 22px rgba(0,0,0,.2)}
 .dd .o{padding:8px 10px;cursor:pointer}.dd .o:hover{background:var(--row)}.dd .nw{color:var(--acc);font-weight:600}.search-select{position:relative}.search-select input{width:100%}.search-select .dd{display:none}.search-select.open .dd{display:block}.search-select .dd .empty-option{padding:9px 10px;color:var(--mut)}.filter-search{margin:8px 0 10px}.filter-search input{max-width:100%}
 h2.t{margin:0;font-size:20px}
-.ui{display:flex;align-items:center;gap:6px}.zoom{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:6px;background:var(--in);overflow:hidden}.zoom button{border:0;border-radius:0;padding:6px 10px;background:transparent;font-weight:700}.zoom button:hover,.themebtn:hover{background:var(--row)}.zoom .zp{min-width:54px;text-align:center;font-size:12px;font-weight:600;padding:6px 4px}.themebtn{width:34px;height:34px;padding:0;border-radius:50%;font-size:17px;line-height:1;display:inline-flex;align-items:center;justify-content:center}
-@media(max-width:760px){main{grid-template-columns:1fr}}
+.themebtn:hover{background:var(--row)}.themebtn{width:34px;height:34px;padding:0;border-radius:50%;font-size:17px;line-height:1;display:inline-flex;align-items:center;justify-content:center;flex:none}
+@media(max-width:900px){main{grid-template-columns:minmax(0,1fr);padding:12px}header{padding:12px}.name{max-width:100%}}
+@media(max-width:560px){header{gap:8px}header button{padding:6px 9px}.tabs{width:100%}.tab{flex:1}.sp{display:none}}
 </style></head><body>
 <header><h1>Supplier Ledger</h1>
 <div class="tabs"><button class="tab on" id="t1" onclick="go(1)">Suppliers</button><button class="tab" id="t2" onclick="go(2)">Purchases by category</button></div>
 <span class="sp"></span>
 <button class="pri" onclick="downloadExcel()" title="Downloads the Excel workbook for the tab you are on">Download Excel</button><button onclick="exp()">Export backup</button><button onclick="document.getElementById('imp').click()">Import backup</button>
 <input type="file" id="imp" accept=".json" hidden onchange="imp(this)">
-<div class="ui"><div class="zoom" title="Zoom"><button onclick="setZoom(-10)" aria-label="Zoom out">−</button><button class="zp" id="zp" onclick="setZoom(0)" title="Reset zoom">100%</button><button onclick="setZoom(10)" aria-label="Zoom in">＋</button></div><button class="themebtn" id="themebtn" onclick="toggleTheme()" aria-label="Toggle light/dark theme" title="Toggle light/dark theme">☾</button></div>
+<button class="themebtn" id="themebtn" onclick="toggleTheme()" aria-label="Toggle light/dark theme" title="Toggle light/dark theme">☾</button>
 </header>
 <main id="p1">
 <div class="card"><div id="sl"></div><div class="add"><input id="ns" placeholder="New supplier name" onkeydown="if(event.key==='Enter')addSup()"><button class="pri" onclick="addSup()">Add</button></div></div>
@@ -72,15 +73,13 @@ h2.t{margin:0;font-size:20px}
 <script>
 /* ---------- Zoom & theme (device-only, not synced) ---------- */
 const UIK='supplier-ledger-ui';
-let UI={zoom:100,theme:''};
+let UI={theme:''};
 try{UI=Object.assign(UI,JSON.parse(localStorage.getItem(UIK))||{})}catch(e){}
 const saveUI=()=>{try{localStorage.setItem(UIK,JSON.stringify(UI))}catch(e){}};
-function applyZoom(){UI.zoom=Math.min(200,Math.max(50,UI.zoom));document.body.style.zoom=UI.zoom/100;const z=document.getElementById('zp');if(z)z.textContent=UI.zoom+'%'}
-function setZoom(d){UI.zoom=d===0?100:UI.zoom+d;applyZoom();saveUI()}
 function curTheme(){return UI.theme||(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')}
 function applyTheme(){const t=curTheme();document.documentElement.setAttribute('data-theme',t);const b=document.getElementById('themebtn');if(b){b.textContent=t==='dark'?'☀':'☾';b.title=t==='dark'?'Switch to light theme':'Switch to dark theme'}}
 function toggleTheme(){UI.theme=curTheme()==='dark'?'light':'dark';applyTheme();saveUI()}
-applyZoom();applyTheme();
+applyTheme();
 
 const KEY='supplier-ledger-v1';
 const SUPABASE_URL='https://tylwxpuarmkdbrhgiztb.supabase.co';
@@ -353,7 +352,8 @@ function xlTable(wb,name,cols,rows,typeCol,boldCol){
       c.fill={type:'pattern',pattern:'solid',fgColor:{argb:bg}};c.border=bd;
       c.font={name:'Calibri',size:11,color:{argb:XL.ink}};
       c.alignment={vertical:'middle',horizontal:cols[n-1][3]};
-      if(cols[n-1][2])c.numFmt=cols[n-1][2];
+      if(cols[n-1][2]==='auto')c.numFmt=Number.isInteger(c.value)?'#,##0':'#,##0.####';
+      else if(cols[n-1][2])c.numFmt=cols[n-1][2];
     });
     if(typeCol&&r.kind!=='white')row.getCell(typeCol).font={name:'Calibri',size:11,bold:true,color:{argb:r.kind==='pay'?XL.greenInk:XL.yelInk}};
     if(boldCol)row.getCell(boldCol).font={name:'Calibri',size:11,bold:true,color:{argb:XL.ink}};
@@ -388,14 +388,14 @@ function downloadExcel(){
   if(!S.entries.length){alert('There are no transactions to export yet.');return}
   page===2?downloadCategoryExcel():downloadSupplierExcel();
 }
-const NF='#,##0.00',BF='#,##0.00;[Red]-#,##0.00',QF='#,##0.##';
+const NF='#,##0.00',BF='#,##0.00;[Red]-#,##0.00',QF='auto';
 async function downloadSupplierExcel(){
   xlNames.clear();xlNames.add('index');xlNames.add('instructions');
   const wb=new ExcelJS.Workbook();wb.creator='Supplier Ledger';wb.created=new Date();
   const sups=[...S.suppliers].sort((a,b)=>a.name.localeCompare(b.name));
-  const idxCols=[['Supplier',34,null,'left'],['Currency',12,null,'center'],['Balance Owed',20,BF,'right'],['Transactions',14,'0','center']];
+  const idxCols=[['Supplier',34,null,'center'],['Currency',12,null,'center'],['Balance Owed',20,BF,'right'],['Transactions',14,'0','center']];
   const idxRows=[],sheets=[];
-  const cols=[['Date',12,'dd-mm-yyyy','center'],['Type',18,null,'left'],['Invoice / Ref',16,null,'left'],['Category',18,null,'left'],['Product',28,null,'left'],['Quantity',12,QF,'right'],['Unit',9,null,'center'],['Currency',10,null,'center'],['Unit Price',15,NF,'right'],['TVA %',8,'0.##','right'],['TVA Amount',15,NF,'right'],['Transport',14,NF,'right'],['Debit',16,NF,'right'],['Payment / Credit',17,NF,'right'],['Balance',17,BF,'right']];
+  const cols=[['Date',12,'dd-mm-yyyy','center'],['Type',18,null,'center'],['Invoice / Ref',16,null,'center'],['Category',18,null,'center'],['Product',28,null,'center'],['Quantity',12,QF,'center'],['Unit',9,null,'center'],['Currency',10,null,'center'],['Unit Price',15,NF,'right'],['TVA %',9,'auto','center'],['TVA Amount',15,NF,'right'],['Transport',14,NF,'right'],['Debit',16,NF,'right'],['Payment / Credit',17,NF,'right'],['Balance',17,BF,'right']];
   sups.forEach(s=>{
     const list=S.entries.map((e,i)=>({e,i})).filter(x=>x.e.sid===s.id).sort((a,b)=>a.e.date<b.e.date?-1:a.e.date>b.e.date?1:a.i-b.i).map(x=>x.e);
     const sheet=xlName(s.name),run={},cnt={};
@@ -436,7 +436,7 @@ async function downloadCategoryExcel(){
   const wb=new ExcelJS.Workbook();wb.creator='Supplier Ledger';wb.created=new Date();
   const sn=id=>(S.suppliers.find(s=>s.id===id)||{name:'(deleted)'}).name;
   const purchases=S.entries.filter(e=>e.type==='purchase').sort((a,b)=>sn(a.sid).localeCompare(sn(b.sid))||(a.date<b.date?-1:a.date>b.date?1:0));
-  const cols=[['Date',12,'dd-mm-yyyy','center'],['Supplier',26,null,'left'],['Invoice / Ref',16,null,'left'],['Category',18,null,'left'],['Product',28,null,'left'],['Quantity',12,QF,'right'],['Unit',9,null,'center'],['Currency',10,null,'center'],['Unit Price',15,NF,'right'],['TVA %',8,'0.##','right'],['TVA Amount',15,NF,'right'],['Transport',14,NF,'right'],['Total with TVA',18,NF,'right']];
+  const cols=[['Date',12,'dd-mm-yyyy','center'],['Supplier',26,null,'center'],['Invoice / Ref',16,null,'center'],['Category',18,null,'center'],['Product',28,null,'left'],['Quantity',12,QF,'center'],['Unit',9,null,'center'],['Currency',10,null,'center'],['Unit Price',15,NF,'right'],['TVA %',9,'auto','center'],['TVA Amount',15,NF,'right'],['Transport',14,NF,'right'],['Total with TVA',18,NF,'right']];
   const mk=l=>l.map(e=>({kind:'white',v:[xlDate(e.date),sn(e.sid),e.inv||'',e.cat||'NO CATEGORY',e.prod||'',e.qty,e.unit||'',e.cur||'',e.price,e.tvaPct,e.tva,e.transport||0,e.amount]}));
   const catOf=e=>e.cat||'NO CATEGORY';
   const catList=[...S.cats];purchases.forEach(e=>{if(!catList.includes(catOf(e)))catList.push(catOf(e))});
