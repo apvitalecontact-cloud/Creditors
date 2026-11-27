@@ -21,7 +21,7 @@ main{display:grid;grid-template-columns:minmax(230px,300px) minmax(0,1fr);gap:16
 .item{display:flex;justify-content:space-between;gap:8px;padding:9px 10px;border:1px solid var(--line);border-radius:6px;margin-bottom:7px;cursor:pointer;background:var(--in)}
 .item.on{border-color:var(--acc);box-shadow:inset 3px 0 0 var(--acc)}
 .item b{text-align:right;font-weight:600;font-size:13px}
-.actions{position:relative;display:inline-flex;align-items:center}.more{width:28px;height:28px;padding:0;border-radius:50%;font-size:18px;line-height:1}.menu{display:none;position:absolute;right:0;top:calc(100% + 4px);z-index:30;min-width:110px;padding:4px;background:var(--card);border:1px solid var(--line);border-radius:7px;box-shadow:0 6px 18px #0002}.menu.open{display:grid}.menu button{border:0;text-align:left;background:transparent;padding:7px 9px}.menu button:hover{background:var(--row)}.form-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0}.form-panel{padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--row)}.form-actions{grid-column:1/-1;display:flex;align-items:center;justify-content:flex-end;gap:8px}.supplier-title{font-size:20px;font-weight:700}
+.actions{position:relative;display:inline-flex;align-items:center}.more{width:28px;height:28px;padding:0;border-radius:50%;font-size:18px;line-height:1}.menu{display:none;position:absolute;right:0;top:calc(100% + 4px);z-index:30;min-width:110px;padding:4px;background:var(--card);border:1px solid var(--line);border-radius:7px;box-shadow:0 6px 18px #0002}.menu.open{display:grid}.menu button{border:0;text-align:left;background:transparent;padding:7px 9px}.menu button:hover{background:var(--row)}.form-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0}.form-panel{padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--row)}.form-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px}.supplier-title{font-size:20px;font-weight:700}
 .item small{display:block;color:var(--mut)}
 input,select{font:inherit;color:var(--ink);background:var(--in);border:1px solid var(--line);border-radius:6px;padding:8px;width:100%;min-width:0}
 input:focus,select:focus,button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
@@ -30,17 +30,26 @@ label{display:block;color:var(--mut);font-size:12px;margin-bottom:3px}
 .top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start;margin-bottom:12px}
 .name{font-size:20px;font-weight:700;max-width:300px}
 .big{text-align:right}.big div{font-size:22px;font-weight:700;color:var(--warn)}.big div.z{color:var(--acc)}
-.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;align-items:end}
+.form{display:flex;flex-wrap:wrap;gap:12px 10px;align-items:flex-end}
+.form>div{flex:1 1 112px;max-width:210px;min-width:0}
+.form>.form-actions{flex:1 0 100%;max-width:none}
 .po{display:block}.form.np .po{display:none}
 .pre{color:var(--mut);margin:8px 0 0}
 .msg{color:var(--warn);margin:6px 0 0;min-height:18px}
-.wrap{overflow-x:auto;margin-top:14px}
+.wrap{overflow-x:auto;margin-top:14px;border:1px solid var(--line);border-radius:8px;background:var(--card)}
 table{border-collapse:collapse;width:100%;min-width:760px}
-th{color:var(--ink);background:var(--head);font-weight:600;font-size:12px;text-align:left;padding:8px 8px;border-bottom:2px solid var(--acc);white-space:nowrap}
-td{padding:9px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--mut);background:var(--head);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.05em;text-align:left;padding:11px 10px;border-bottom:2px solid var(--acc);white-space:nowrap}
+td{padding:10px;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
 tbody tr.pay td{background:var(--payBg)}tbody tr.ret td{background:var(--retBg)}
-tbody tr.pay td.ty{color:var(--payInk);font-weight:600}tbody tr.ret td.ty{color:var(--retInk);font-weight:600}
-.r{text-align:right}.mut{color:var(--mut)}
+tbody tr:hover td{background-image:linear-gradient(rgba(47,109,181,.07),rgba(47,109,181,.07))}
+.bd{display:inline-block;padding:2px 10px;border-radius:999px;font-size:11.5px;font-weight:600;letter-spacing:.01em;white-space:nowrap}
+.b-pur{background:var(--head);color:var(--acc)}.b-pay{background:rgba(30,123,69,.16);color:var(--payInk)}.b-ret{background:rgba(180,140,0,.2);color:var(--retInk)}
+.cr{color:var(--payInk);font-weight:600}tr.ret .cr{color:var(--retInk)}
+td.pr{white-space:normal;min-width:150px;font-weight:500}td.c{text-align:center}th.c{text-align:center}
+table{font-size:13px;font-variant-numeric:tabular-nums}
+.form-head b{font-size:15px}
+.r{text-align:right}th.r{text-align:right}.mut{color:var(--mut)}
 td button{padding:3px 8px;font-size:12px}
 h3{margin:18px 0 6px;font-size:15px}
 .empty{color:var(--mut);padding:18px 4px}
@@ -299,8 +308,8 @@ function renderLedger(){
   const run={};
   const rows=list.map(e=>{run[e.cur]=(run[e.cur]||0)+(isDr(e)?e.amount:-e.amount);const p=e.type==='purchase'||e.type==='return',d=isDr(e);
     const rc=e.type==='payment'?'pay':(['return','debitadj','creditadj'].includes(e.type)?'ret':'');
-    return `<tr class="${rc}"><td>${fd(e.date)}</td><td class="ty">${TL[e.type]||e.type}</td><td>${esc(e.inv)}</td><td>${esc(e.cat)}</td><td>${esc(e.prod)}</td><td class="r">${p?fmt(e.qty).replace(/\.00$/,''):''}</td><td>${p?esc(e.unit):''}</td><td>${esc(e.cur)}</td><td class="r">${p?fmt(e.price):''}</td><td class="r">${p?fmt(e.tva):''}</td><td class="r">${d?fmt(e.amount):''}</td><td class="r">${d?'':fmt(e.amount)}</td><td class="r"><b>${fmt(run[e.cur])}</b></td><td><span class="actions"><button class="more" aria-label="Transaction actions" onclick="toggleMenu(event,'m_${e.id}')">＋</button><span class="menu" id="m_${e.id}"><button onclick="editEntry('${e.id}')">Edit</button><button onclick="delEntry('${e.id}')">Delete</button></span></span></td></tr>`}).join('');
-  $('led').innerHTML=list.length?`<table><thead><tr><th>Date</th><th>Type</th><th>Invoice / ref</th><th>Category</th><th>Product</th><th class="r">Quantity</th><th>Unit</th><th>Cur</th><th class="r">Price</th><th class="r">TVA</th><th class="r">Debit</th><th class="r">Payment / credit</th><th class="r">Balance</th><th></th></tr></thead><tbody>${rows}</tbody></table>`:'<div class="empty">No entries yet. Fill the form above and save the first one.</div>';
+    return `<tr class="${rc}"><td>${fd(e.date)}</td><td class="ty"><span class="bd ${e.type==='purchase'?'b-pur':e.type==='payment'?'b-pay':'b-ret'}">${TL[e.type]||e.type}</span></td><td>${esc(e.inv)}</td><td>${esc(e.cat)}</td><td class="pr">${esc(e.prod)}</td><td class="r">${p?fmt(e.qty).replace(/\.00$/,''):''}</td><td class="c mut">${p?esc(e.unit):''}</td><td class="c mut">${esc(e.cur)}</td><td class="r">${p?fmt(e.price):''}</td><td class="r">${p?fmt(e.tva):''}</td><td class="r">${d?fmt(e.amount):''}</td><td class="r cr">${d?'':fmt(e.amount)}</td><td class="r"><b>${fmt(run[e.cur])}</b></td><td><span class="actions"><button class="more" aria-label="Transaction actions" onclick="toggleMenu(event,'m_${e.id}')">＋</button><span class="menu" id="m_${e.id}"><button onclick="editEntry('${e.id}')">Edit</button><button onclick="delEntry('${e.id}')">Delete</button></span></span></td></tr>`}).join('');
+  $('led').innerHTML=list.length?`<table><thead><tr><th>Date</th><th>Type</th><th>Invoice / ref</th><th>Category</th><th>Product</th><th class="r">Quantity</th><th class="c">Unit</th><th class="c">Cur</th><th class="r">Price</th><th class="r">TVA</th><th class="r">Debit</th><th class="r">Payment / credit</th><th class="r">Balance</th><th></th></tr></thead><tbody>${rows}</tbody></table>`:'<div class="empty">No entries yet. Fill the form above and save the first one.</div>';
   const b=$('bal');if(b){const x=bal(S.sel);b.innerHTML=cs(x);b.className=Object.keys(x).some(c=>Math.abs(x[c])>0.004)?'':'z'}
 }
 
@@ -363,17 +372,6 @@ function xlTable(wb,name,cols,rows,typeCol,boldCol){
   ws.pageSetup={orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0};
   return ws;
 }
-function xlInstructions(wb,title,lines){
-  const ws=wb.addWorksheet(xlName('Instructions'));
-  ws.getColumn(1).width=110;
-  const t=ws.addRow([title]);t.height=28;t.getCell(1).font={bold:true,size:15,color:{argb:XL.blue},name:'Calibri'};
-  ws.addRow(['']);
-  lines.forEach(l=>{const r=ws.addRow([l]);const h=/^[A-Z ]+:?$/.test(l);r.getCell(1).font={name:'Calibri',size:11,bold:h,color:{argb:XL.ink}};r.getCell(1).alignment={wrapText:true,vertical:'top'}});
-  const key=[['White row','Purchase',XL.white,XL.ink],['Green row','Payment',XL.green,XL.greenInk],['Yellow row','Return, Debit Adjustment or Credit Adjustment',XL.yel,XL.yelInk]];
-  ws.addRow(['']);
-  key.forEach(k=>{const r=ws.addRow([k[0]+'  =  '+k[1]]);const c=r.getCell(1);c.fill={type:'pattern',pattern:'solid',fgColor:{argb:k[2]}};c.font={name:'Calibri',size:11,bold:true,color:{argb:k[3]}};c.border={top:{style:'thin',color:{argb:XL.line}},bottom:{style:'thin',color:{argb:XL.line}},left:{style:'thin',color:{argb:XL.line}},right:{style:'thin',color:{argb:XL.line}}}});
-  ws.views=[{showGridLines:false}];
-}
 async function xlSave(wb,base){
   try{
     const buf=await wb.xlsx.writeBuffer();
@@ -390,7 +388,7 @@ function downloadExcel(){
 }
 const NF='#,##0.00',BF='#,##0.00;[Red]-#,##0.00',QF='auto';
 async function downloadSupplierExcel(){
-  xlNames.clear();xlNames.add('index');xlNames.add('instructions');
+  xlNames.clear();xlNames.add('index');
   const wb=new ExcelJS.Workbook();wb.creator='Supplier Ledger';wb.created=new Date();
   const sups=[...S.suppliers].sort((a,b)=>a.name.localeCompare(b.name));
   const idxCols=[['Supplier',34,null,'center'],['Currency',12,null,'center'],['Balance Owed',20,BF,'right'],['Transactions',14,'0','center']];
@@ -412,27 +410,10 @@ async function downloadSupplierExcel(){
   });
   xlTable(wb,'Index',idxCols,idxRows,null,3);
   sheets.forEach(x=>xlTable(wb,x[0],x[1],x[2],2,15));
-  xlInstructions(wb,'Supplier Ledger – Instructions',[
-    'ABOUT THIS FILE',
-    'This workbook was exported from the Supplier Ledger. The first sheet, Index, lists every supplier with the balance owed in each currency. After it comes one sheet per supplier containing all of that supplier’s transactions.',
-    '',
-    'HOW TO USE',
-    '• Click a supplier name on the Index sheet to jump straight to that supplier’s sheet.',
-    '• Every sheet has a filter on the heading row – click the small arrow on any heading to filter or sort.',
-    '• The heading row is frozen, so it stays visible while you scroll.',
-    '• Quantity and Unit are separate columns, so Quantity can be sorted and calculated as a number.',
-    '',
-    'BALANCES',
-    '• Balance Owed is the amount still owed to the supplier. Purchases and Debit Adjustments increase it; Payments, Returns and Credit Adjustments reduce it.',
-    '• The Balance column on each supplier sheet is a running balance per currency, in date order. Balances in different currencies are never added together.',
-    '• Note: if you sort or filter a sheet, the running Balance values stay as exported.',
-    '',
-    'ROW COLOURS'
-  ]);
   await xlSave(wb,'supplier-ledger-suppliers');
 }
 async function downloadCategoryExcel(){
-  xlNames.clear();xlNames.add('instructions');
+  xlNames.clear();
   const wb=new ExcelJS.Workbook();wb.creator='Supplier Ledger';wb.created=new Date();
   const sn=id=>(S.suppliers.find(s=>s.id===id)||{name:'(deleted)'}).name;
   const purchases=S.entries.filter(e=>e.type==='purchase').sort((a,b)=>sn(a.sid).localeCompare(sn(b.sid))||(a.date<b.date?-1:a.date>b.date?1:0));
@@ -442,20 +423,6 @@ async function downloadCategoryExcel(){
   const catList=[...S.cats];purchases.forEach(e=>{if(!catList.includes(catOf(e)))catList.push(catOf(e))});
   xlTable(wb,xlName('All Categories'),cols,mk(purchases),null,13);
   catList.forEach(c=>xlTable(wb,xlName(c),cols,mk(purchases.filter(e=>catOf(e)===c)),null,13));
-  xlInstructions(wb,'Purchases by Category – Instructions',[
-    'ABOUT THIS FILE',
-    'This workbook was exported from the Supplier Ledger. The first sheet, All Categories, contains every purchase. After it comes one sheet for each category (for example RAW MATERIAL) containing only that category’s purchases.',
-    '',
-    'HOW TO USE',
-    '• Every sheet has a filter on the heading row – click the small arrow on any heading to filter or sort, for example by Supplier or Product.',
-    '• The heading row is frozen, so it stays visible while you scroll.',
-    '• Quantity and Unit are separate columns, so Quantity can be sorted and calculated as a number.',
-    '• Total with TVA = Quantity × Unit Price + TVA Amount + Transport.',
-    '• Amounts in different currencies should not be added together – filter by Currency first.',
-    '• Categories with no purchases have a sheet with headings only.',
-    '',
-    'ROW COLOURS'
-  ]);
   await xlSave(wb,'supplier-ledger-categories');
 }
 
