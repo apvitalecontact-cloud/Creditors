@@ -16,7 +16,7 @@ h1{font-size:18px;margin:0 12px 0 0}
 .tab.on,button.pri{background:var(--acc);color:var(--on);border-color:var(--acc);font-weight:600}
 button.del{color:var(--warn)}
 .sp{flex:1}
-main{display:grid;grid-template-columns:minmax(210px,250px) minmax(0,1fr);gap:16px;padding:16px 20px;align-items:start;max-width:1800px;margin:0 auto;width:100%}
+main{display:grid;grid-template-columns:minmax(210px,250px) minmax(0,1fr);gap:16px;padding:16px 20px;align-items:start;width:100%}
 .card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px}
 .item{display:flex;justify-content:space-between;gap:8px;padding:9px 10px;border:1px solid var(--line);border-radius:6px;margin-bottom:7px;cursor:pointer;background:var(--in)}
 .item.on{border-color:var(--acc);box-shadow:inset 3px 0 0 var(--acc)}
@@ -48,7 +48,7 @@ tbody tr:hover td{background-image:linear-gradient(rgba(47,109,181,.07),rgba(47,
 .b-pur{background:var(--head);color:var(--acc)}.b-pay{background:rgba(30,123,69,.16);color:var(--payInk)}.b-ret{background:rgba(180,140,0,.2);color:var(--retInk)}
 .cr{color:var(--payInk);font-weight:600}tr.ret .cr{color:var(--retInk)}
 td.pr{font-weight:500}td.c{text-align:center}th.c{text-align:center}
-table{font-size:clamp(10.5px,1.02cqw,13px);font-variant-numeric:tabular-nums}
+table{font-size:var(--tf,13px);font-variant-numeric:tabular-nums}
 .form-head b{font-size:15px}
 .r{text-align:right}th.r{text-align:right}.mut{color:var(--mut)}
 td button{padding:3px 8px;font-size:12px}
@@ -491,5 +491,23 @@ async function downloadCategoryExcel(){
 function exp(){const a=document.createElement('a');a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(S));a.download='supplier-ledger-backup.json';a.click()}
 function imp(i){const f=i.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.suppliers||!d.entries)throw 0;S=d;normalizeState();save();hasForm=false;go(page)}catch(e){alert('That file is not a valid backup.')}};r.readAsText(f)}
 document.addEventListener('click',e=>{document.querySelectorAll('.search-select.open').forEach(box=>{if(!box.contains(e.target))box.classList.remove('open')});document.querySelectorAll('.menu.open').forEach(m=>{if(!m.parentElement.contains(e.target))m.classList.remove('open')})});
+/* ---------- Fit tables to the available width (shrinks text only when needed) ---------- */
+function fitTables(){
+  document.querySelectorAll('.wrap').forEach(w=>{
+    const t=w.querySelector('table');if(!t||!w.offsetParent)return;
+    let f=13;w.style.setProperty('--tf',f+'px');
+    for(let i=0;i<4;i++){
+      const need=t.offsetWidth,have=w.clientWidth;
+      if(need<=have+1)break;
+      f=Math.max(9.5,f*have/need*0.995);w.style.setProperty('--tf',f.toFixed(2)+'px');
+    }
+  });
+}
+(function(){
+  const rl=renderLedger,rc=renderCat;
+  renderLedger=function(){rl.apply(this,arguments);fitTables()};
+  renderCat=function(){rc.apply(this,arguments);fitTables()};
+  let t;window.addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(fitTables,60)});
+})();
 initShared();
 </script></body></html>
