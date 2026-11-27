@@ -119,11 +119,18 @@ let writeTimer=null;
 let remoteReady=false;
 let applyingRemote=false;
 
+const DEFAULT_CATS=['RAW MATERIAL','FIXED ASSET','SPARE PARTS','LABORATORY','CHEMICAL','OTR TICKETS','FINISHED GOODS','NO CATEGORY'];
+/* Category list = default categories + only those custom categories that existing entries use */
+function syncCats(){
+  const used=[];
+  (S.entries||[]).forEach(e=>{const c=(e.cat||'').trim();if(c&&!DEFAULT_CATS.includes(c.toUpperCase())&&!used.includes(c))used.push(c)});
+  S.cats=[...DEFAULT_CATS,...used.sort()];
+}
 function normalizeState(){
-  S.cats=['RAW MATERIAL','FIXED ASSET','SPARE PARTS','LABORATORY','CHEMICAL','OTR TICKETS','FINISHED GOODS','NO CATEGORY'];
   S.units=S.units||['PCS','CTN','KG','LTR'];
   S.curs=(S.curs||[]).map(c=>c==='XOF'?'CFA':c);
   S.entries=S.entries||[];
+  syncCats();
   S.entries.forEach(e=>{if(e.cur==='XOF')e.cur='CFA'});
   ['CFA','USD','EUR','AED'].forEach(c=>{if(!S.curs.includes(c))S.curs.push(c)});
   if(S.sel&&!S.suppliers.some(s=>s.id===S.sel))S.sel=S.suppliers[0]?.id||null;
@@ -227,6 +234,18 @@ const FID={cat:'fcat',unit:'funit',prod:'fprod',cur:'fcur'};
 function fopts(k){return OPTS[k]();}
 function val(id){return $(id).value||''}
 function optionKey(ev,k){if(ev.key==='Enter'){ev.preventDefault();const q=$(`${FID[k]}_search`).value.trim();const opts=fopts(k);const exact=opts.find(x=>x.toLowerCase()===q.toLowerCase());if(exact)chooseOption(k,exact);else if(q)chooseOption(k,q,true)}}
+/* Register whatever is typed when the user clicks away (existing option -> selected, otherwise -> new) */
+function commitOption(k){
+  const input=$(`${FID[k]}_search`),sel=$(FID[k]),box=$(`${FID[k]}_box`);
+  if(!input||!sel)return;
+  const t=input.value.trim();
+  if(box)box.classList.remove('open');
+  if(!t){if(k==='cur'){input.value=sel.value}else if(sel.value){sel.value='';if(k==='prod')pv()}return}
+  const ex=fopts(k).find(x=>String(x).toLowerCase()===t.toLowerCase());
+  const target=ex||t;
+  if(sel.value&&sel.value.toLowerCase()===String(target).toLowerCase()){input.value=sel.value;return}
+  chooseOption(k,target,!ex);
+}
 function searchOptions(k,showAll){
   const input=$(`${FID[k]}_search`),box=$(`${FID[k]}_box`),dd=$(`${FID[k]}_dd`);
   if(!input||!box||!dd)return;
@@ -239,7 +258,7 @@ function searchOptions(k,showAll){
 }
 function chooseOption(k,v,isNew=false){
   v=String(v||'').trim();if(!v)return;
-  if(k==='cat'){v=v.toUpperCase();if(isNew){ensure(S.cats,v);save()}else if(!S.cats.some(x=>x.toLowerCase()===v.toLowerCase()))v='NO CATEGORY';else v=S.cats.find(x=>x.toLowerCase()===v.toLowerCase());}
+  if(k==='cat'){v=v.toUpperCase();if(isNew){/* added to the list only once an entry is saved with it */}else if(!S.cats.some(x=>x.toLowerCase()===v.toLowerCase()))v='NO CATEGORY';else v=S.cats.find(x=>x.toLowerCase()===v.toLowerCase());}
   if(k==='unit'&&isNew){ensure(S.units,v);save()}
   if(k==='cur'&&isNew){ensure(S.curs,v.toUpperCase());v=v.toUpperCase();save()}
   if(k==='cur')v=v.toUpperCase();
@@ -264,7 +283,7 @@ function selChg(s){/* retained for compatibility */}
 function addSup(){const n=$('ns').value.trim();if(!n)return;const id='s'+uid();S.suppliers.push({id,name:n});S.sel=id;$('ns').value='';save();hasForm=false;renderSup()}
 function pick(id){S.sel=id;window.ledQuery='';window.ledF={};editId=null;hasForm=false;save();renderSup()}
 function renameSup(v){const s=S.suppliers.find(x=>x.id===S.sel);if(s&&v.trim()){s.name=v.trim();save();renderSupList()}}
-function delSup(){S.entries=S.entries.filter(e=>e.sid!==S.sel);S.suppliers=S.suppliers.filter(s=>s.id!==S.sel);S.sel=S.suppliers[0]?S.suppliers[0].id:null;save();hasForm=false;renderSup()}
+function delSup(){S.entries=S.entries.filter(e=>e.sid!==S.sel);syncCats();S.suppliers=S.suppliers.filter(s=>s.id!==S.sel);S.sel=S.suppliers[0]?S.suppliers[0].id:null;save();hasForm=false;renderSup()}
 function renderSupList(){$('sl').innerHTML=S.suppliers.map(s=>`<div class="item ${s.id===S.sel?'on':''}" onclick="pick('${s.id}')"><span>${esc(s.name)}</span><b>${cs(bal(s.id))}</b></div>`).join('')||'<div class="empty">No suppliers yet.</div>';const b=$('bal');if(b){const x=bal(S.sel);b.innerHTML=cs(x);b.className=Object.keys(x).some(c=>Math.abs(x[c])>0.004)?'':'z'}}
 function renderSup(){
   lists();renderSupList();
@@ -276,15 +295,15 @@ function renderSup(){
 <div><label>Date</label><input type="date" id="fdte"></div>
 <div><label>Entry type</label><select id="ftype" onchange="typ()"><option value="purchase">Purchase</option><option value="payment">Payment</option><option value="return">Return</option><option value="debitadj">Debit Adjustment</option><option value="creditadj">Credit Adjustment</option></select></div>
 <div><label>Invoice / reference</label><input id="finv"></div>
-<div class="po"><label>Category</label><div class="search-select" id="fcat_box"><input id="fcat_search" placeholder="Search category..." autocomplete="off" oninput="searchOptions('cat')" onfocus="this.select();searchOptions('cat',true)" onkeydown="optionKey(event,'cat')"><div class="dd" id="fcat_dd"></div><select id="fcat" hidden></select></div></div>
-<div class="po"><label>Product</label><div class="search-select" id="fprod_box"><input id="fprod_search" placeholder="Search product..." autocomplete="off" oninput="searchOptions('prod')" onfocus="searchOptions('prod')" onkeydown="optionKey(event,'prod')"><div class="dd" id="fprod_dd"></div><select id="fprod" hidden></select></div></div>
+<div class="po"><label>Category</label><div class="search-select" id="fcat_box"><input id="fcat_search" placeholder="Search category..." autocomplete="off" oninput="searchOptions('cat')" onfocus="this.select();searchOptions('cat',true)" onkeydown="optionKey(event,'cat')" onblur="commitOption('cat')"><div class="dd" id="fcat_dd"></div><select id="fcat" hidden></select></div></div>
+<div class="po"><label>Product</label><div class="search-select" id="fprod_box"><input id="fprod_search" placeholder="Search product..." autocomplete="off" oninput="searchOptions('prod')" onfocus="searchOptions('prod')" onkeydown="optionKey(event,'prod')" onblur="commitOption('prod')"><div class="dd" id="fprod_dd"></div><select id="fprod" hidden></select></div></div>
 <div class="po"><label>Quantity</label><input type="number" id="fqty" min="0" step="any" oninput="pv()"></div>
-<div class="po"><label>Unit</label><div class="search-select" id="funit_box"><input id="funit_search" placeholder="Search unit..." autocomplete="off" oninput="searchOptions('unit')" onfocus="searchOptions('unit')" onkeydown="optionKey(event,'unit')"><div class="dd" id="funit_dd"></div><select id="funit" hidden></select></div></div>
+<div class="po"><label>Unit</label><div class="search-select" id="funit_box"><input id="funit_search" placeholder="Search unit..." autocomplete="off" oninput="searchOptions('unit')" onfocus="searchOptions('unit')" onkeydown="optionKey(event,'unit')" onblur="commitOption('unit')"><div class="dd" id="funit_dd"></div><select id="funit" hidden></select></div></div>
 <div class="po"><label>Price before TVA</label><input type="number" id="fprice" min="0" step="any" oninput="pv()"></div>
 <div class="po"><label>TVA %</label><input type="number" id="ftva" value="18" min="0" step="any" oninput="pv()"></div>
 <div class="po"><label>Transport / Freight</label><input type="number" id="ftransport" min="0" step="any" value="0" oninput="pv()"></div>
 <div class="pd"><label>Description</label><input id="fdesc" placeholder="Optional note" autocomplete="off"></div>
-<div><label>Currency</label><div class="search-select" id="fcur_box"><input id="fcur_search" placeholder="Search currency..." autocomplete="off" oninput="searchOptions('cur')" onfocus="this.select();searchOptions('cur',true)" onkeydown="optionKey(event,'cur')"><div class="dd" id="fcur_dd"></div><select id="fcur" hidden></select></div></div>
+<div><label>Currency</label><div class="search-select" id="fcur_box"><input id="fcur_search" placeholder="Search currency..." autocomplete="off" oninput="searchOptions('cur')" onfocus="this.select();searchOptions('cur',true)" onkeydown="optionKey(event,'cur')" onblur="commitOption('cur')"><div class="dd" id="fcur_dd"></div><select id="fcur" hidden></select></div></div>
 <div class="pa"><label>Amount</label><input type="number" id="famt" min="0" step="any"></div>
 <div class="form-actions"><button id="fcancel" onclick="cancelEdit()" hidden>Cancel</button><button class="pri" id="fsave" onclick="saveEntry()">Save entry</button></div>
 </div></div><p class="pre" id="pre" ${hasForm?'':'hidden'}></p><p class="msg" id="msg" ${hasForm?'':'hidden'}></p>
@@ -324,7 +343,7 @@ function saveEntry(){
     e.sub=e.qty*e.price;e.tva=e.sub*e.tvaPct/100;e.amount=e.sub+e.tva+e.transport
   }else{e.desc=g('fdesc').trim();e.amount=+g('famt');if(!(e.amount>0)){m.textContent='Enter an amount.';return}}
   const i=S.entries.findIndex(x=>x.id===e.id);i>=0?S.entries[i]=e:S.entries.push(e);
-  save();editId=null;hasForm=false;renderSup();
+  syncCats();save();editId=null;hasForm=false;renderSup();
   $('ftype').value=type;typ()
 }
 function editEntry(id){const e=S.entries.find(x=>x.id===id);if(!e)return;editId=id;hasForm=true;renderSup();
@@ -332,7 +351,7 @@ function editEntry(id){const e=S.entries.find(x=>x.id===id);if(!e)return;editId=
   if(e.type==='purchase'||e.type==='return'){setv('cat',e.cat);setv('prod',e.prod);$('fqty').value=e.qty;setv('unit',e.unit);$('fprice').value=e.price;$('ftva').value=e.tvaPct;$('ftransport').value=e.transport||0;pv()}else {$('fdesc').value=e.desc||e.prod||'';$('famt').value=e.amount}
   $('fsave').textContent='Update entry';$('fcancel').hidden=false;$('f').scrollIntoView({block:'nearest'})}
 function cancelEdit(){editId=null;hasForm=false;renderSup()}
-function delEntry(id){const e=S.entries.find(x=>x.id===id);if(!e||!confirm('Delete this transaction?'))return;S.entries=S.entries.filter(x=>x.id!==id);save();renderSup2()}
+function delEntry(id){const e=S.entries.find(x=>x.id===id);if(!e||!confirm('Delete this transaction?'))return;S.entries=S.entries.filter(x=>x.id!==id);syncCats();save();renderSup2()}
 function renderSup2(){renderLedger();renderSupList()}
 const LEDC=['Date','Type','Invoice / ref','Category','Product','Quantity','Unit','Cur','Price','TVA','Debit','Payment / credit','Balance'];
 window.ledQuery=window.ledQuery||'';window.ledF=window.ledF||{};
@@ -396,8 +415,8 @@ const purch=c=>S.entries.filter(e=>e.type==='purchase'&&e.cat===c);
 function addCat(){const n=ensure(S.cats,$('nc').value);if(!n)return;S.csel=n;$('nc').value='';save();renderCat()}
 function pickCat(c){S.csel=c;save();renderCat()}
 function renameCat(v){v=v.trim();const o=S.csel;if(!v||v===o)return;if(S.cats.some(x=>x.toLowerCase()===v.toLowerCase()&&x!==o)){renderCat();return}
-  S.cats=S.cats.map(c=>c===o?v:c);S.entries.forEach(e=>{if(e.cat===o)e.cat=v});S.csel=v;save();renderCat()}
-function delCat(){const o=S.csel;S.cats=S.cats.filter(c=>c!==o);S.entries.forEach(e=>{if(e.cat===o)e.cat=''});S.csel='';save();renderCat()}
+  S.cats=S.cats.map(c=>c===o?v:c);S.entries.forEach(e=>{if(e.cat===o)e.cat=v});syncCats();S.csel=v;save();renderCat()}
+function delCat(){const o=S.csel;S.cats=S.cats.filter(c=>c!==o);S.entries.forEach(e=>{if(e.cat===o)e.cat=''});syncCats();S.csel='';save();renderCat()}
 function renderCat(){
   if(S.csel&&!S.cats.includes(S.csel))S.csel='';
   const c=S.csel,fs=window.cf||'',query=(window.catQuery||'').trim().toLowerCase();
