@@ -227,19 +227,19 @@ const FID={cat:'fcat',unit:'funit',prod:'fprod',cur:'fcur'};
 function fopts(k){return OPTS[k]();}
 function val(id){return $(id).value||''}
 function optionKey(ev,k){if(ev.key==='Enter'){ev.preventDefault();const q=$(`${FID[k]}_search`).value.trim();const opts=fopts(k);const exact=opts.find(x=>x.toLowerCase()===q.toLowerCase());if(exact)chooseOption(k,exact);else if(q)chooseOption(k,q,true)}}
-function searchOptions(k){
+function searchOptions(k,showAll){
   const input=$(`${FID[k]}_search`),box=$(`${FID[k]}_box`),dd=$(`${FID[k]}_dd`);
   if(!input||!box||!dd)return;
-  const q=input.value.trim().toLowerCase(),opts=fopts(k);
+  const q=showAll?'':input.value.trim().toLowerCase(),opts=fopts(k);
   const matches=opts.filter(x=>String(x).toLowerCase().includes(q));
   let html=needCat(k)?'<div class="empty-option">Choose a category first to see its products</div>':matches.map(x=>`<div class="o" onmousedown="event.preventDefault()" onclick="chooseOption('${k}',decodeURIComponent('${encodeURIComponent(x)}') )">${esc(x)}</div>`).join('');
-  if(k!=='cat'&&q&&!matches.some(x=>String(x).toLowerCase()===q))html+=`<div class="o nw" onmousedown="event.preventDefault()" onclick="chooseOption('${k}',decodeURIComponent('${encodeURIComponent(input.value.trim())}'),true)">＋ New ${NEWT[k].replace(/^New /,'')} “${esc(input.value.trim())}”</div>`;
+  if(q&&!matches.some(x=>String(x).toLowerCase()===q))html+=`<div class="o nw" onmousedown="event.preventDefault()" onclick="chooseOption('${k}',decodeURIComponent('${encodeURIComponent(input.value.trim())}'),true)">＋ New ${NEWT[k].replace(/^New /,'')} “${esc(input.value.trim())}”</div>`;
   if(!html)html='<div class="empty-option">No matches</div>';
   dd.innerHTML=html;box.classList.add('open');
 }
 function chooseOption(k,v,isNew=false){
   v=String(v||'').trim();if(!v)return;
-  if(k==='cat'){v=v.toUpperCase();if(!S.cats.includes(v))v='NO CATEGORY';}
+  if(k==='cat'){v=v.toUpperCase();if(isNew){ensure(S.cats,v);save()}else if(!S.cats.some(x=>x.toLowerCase()===v.toLowerCase()))v='NO CATEGORY';else v=S.cats.find(x=>x.toLowerCase()===v.toLowerCase());}
   if(k==='unit'&&isNew){ensure(S.units,v);save()}
   if(k==='cur'&&isNew){ensure(S.curs,v.toUpperCase());v=v.toUpperCase();save()}
   if(k==='cur')v=v.toUpperCase();
@@ -276,7 +276,7 @@ function renderSup(){
 <div><label>Date</label><input type="date" id="fdte"></div>
 <div><label>Entry type</label><select id="ftype" onchange="typ()"><option value="purchase">Purchase</option><option value="payment">Payment</option><option value="return">Return</option><option value="debitadj">Debit Adjustment</option><option value="creditadj">Credit Adjustment</option></select></div>
 <div><label>Invoice / reference</label><input id="finv"></div>
-<div class="po"><label>Category</label><div class="search-select" id="fcat_box"><input id="fcat_search" placeholder="Search category..." autocomplete="off" oninput="searchOptions('cat')" onfocus="searchOptions('cat')" onkeydown="optionKey(event,'cat')"><div class="dd" id="fcat_dd"></div><select id="fcat" hidden></select></div></div>
+<div class="po"><label>Category</label><div class="search-select" id="fcat_box"><input id="fcat_search" placeholder="Search category..." autocomplete="off" oninput="searchOptions('cat')" onfocus="this.select();searchOptions('cat',true)" onkeydown="optionKey(event,'cat')"><div class="dd" id="fcat_dd"></div><select id="fcat" hidden></select></div></div>
 <div class="po"><label>Product</label><div class="search-select" id="fprod_box"><input id="fprod_search" placeholder="Search product..." autocomplete="off" oninput="searchOptions('prod')" onfocus="searchOptions('prod')" onkeydown="optionKey(event,'prod')"><div class="dd" id="fprod_dd"></div><select id="fprod" hidden></select></div></div>
 <div class="po"><label>Quantity</label><input type="number" id="fqty" min="0" step="any" oninput="pv()"></div>
 <div class="po"><label>Unit</label><div class="search-select" id="funit_box"><input id="funit_search" placeholder="Search unit..." autocomplete="off" oninput="searchOptions('unit')" onfocus="searchOptions('unit')" onkeydown="optionKey(event,'unit')"><div class="dd" id="funit_dd"></div><select id="funit" hidden></select></div></div>
@@ -284,7 +284,7 @@ function renderSup(){
 <div class="po"><label>TVA %</label><input type="number" id="ftva" value="18" min="0" step="any" oninput="pv()"></div>
 <div class="po"><label>Transport / Freight</label><input type="number" id="ftransport" min="0" step="any" value="0" oninput="pv()"></div>
 <div class="pd"><label>Description</label><input id="fdesc" placeholder="Optional note" autocomplete="off"></div>
-<div><label>Currency</label><div class="search-select" id="fcur_box"><input id="fcur_search" placeholder="Search currency..." autocomplete="off" oninput="searchOptions('cur')" onfocus="searchOptions('cur')" onkeydown="optionKey(event,'cur')"><div class="dd" id="fcur_dd"></div><select id="fcur" hidden></select></div></div>
+<div><label>Currency</label><div class="search-select" id="fcur_box"><input id="fcur_search" placeholder="Search currency..." autocomplete="off" oninput="searchOptions('cur')" onfocus="this.select();searchOptions('cur',true)" onkeydown="optionKey(event,'cur')"><div class="dd" id="fcur_dd"></div><select id="fcur" hidden></select></div></div>
 <div class="pa"><label>Amount</label><input type="number" id="famt" min="0" step="any"></div>
 <div class="form-actions"><button id="fcancel" onclick="cancelEdit()" hidden>Cancel</button><button class="pri" id="fsave" onclick="saveEntry()">Save entry</button></div>
 </div></div><p class="pre" id="pre" ${hasForm?'':'hidden'}></p><p class="msg" id="msg" ${hasForm?'':'hidden'}></p>
