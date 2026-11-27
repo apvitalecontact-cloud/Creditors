@@ -33,13 +33,14 @@ label{display:block;color:var(--mut);font-size:12px;margin-bottom:3px}
 .form{display:flex;flex-wrap:wrap;gap:12px 10px;align-items:flex-end}
 .form>div{flex:1 1 112px;max-width:210px;min-width:0}
 .form>.form-actions{flex:1 0 100%;max-width:none}
-.po{display:block}.form.np .po{display:none}
+.po{display:block}.form.np .po:not(.pp){display:none}
 .pre{color:var(--mut);margin:8px 0 0}
 .msg{color:var(--warn);margin:6px 0 0;min-height:18px}
-.wrap{overflow-x:auto;margin-top:14px;border:1px solid var(--line);border-radius:8px;background:var(--card)}
-table{border-collapse:collapse;width:100%;min-width:760px}
-th{color:var(--mut);background:var(--head);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.05em;text-align:left;padding:11px 10px;border-bottom:2px solid var(--acc);white-space:nowrap}
+.wrap{container-type:inline-size;overflow-x:auto;margin-top:14px;border:1px solid var(--line);border-radius:8px;background:var(--card)}
+table{border-collapse:collapse;width:100%}
+th{color:var(--mut);background:var(--head);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.05em;text-align:left;padding:11px 10px;border-bottom:2px solid var(--acc);white-space:normal;line-height:1.25;vertical-align:bottom}
 td{padding:10px;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:middle}
+td.tx{white-space:normal;overflow-wrap:anywhere;min-width:70px}
 tbody tr:last-child td{border-bottom:0}
 tbody tr.pay td{background:var(--payBg)}tbody tr.ret td{background:var(--retBg)}
 tbody tr:hover td{background-image:linear-gradient(rgba(47,109,181,.07),rgba(47,109,181,.07))}
@@ -59,6 +60,8 @@ h3{margin:18px 0 6px;font-size:15px}
 .dd .o{padding:8px 10px;cursor:pointer}.dd .o:hover{background:var(--row)}.dd .nw{color:var(--acc);font-weight:600}.search-select{position:relative}.search-select input{width:100%}.search-select .dd{display:none}.search-select.open .dd{display:block}.search-select .dd .empty-option{padding:9px 10px;color:var(--mut)}.filter-search{margin:8px 0 10px}.filter-search input{max-width:100%}
 h2.t{margin:0;font-size:20px}
 .themebtn:hover{background:var(--row)}.themebtn{width:34px;height:34px;padding:0;border-radius:50%;font-size:17px;line-height:1;display:inline-flex;align-items:center;justify-content:center;flex:none}
+@container (max-width:1150px){table{font-size:12px}td{padding:8px 6px}th{padding:9px 6px;font-size:10px;letter-spacing:.02em}.bd{padding:2px 7px;font-size:10.5px}td.pr{min-width:110px}}
+@container (max-width:850px){table{font-size:11.5px}td{padding:7px 4px}th{padding:8px 4px}.bd{padding:1px 6px}td.pr{min-width:90px}.more{width:24px;height:24px;font-size:15px}}
 @media(max-width:900px){main{grid-template-columns:minmax(0,1fr);padding:12px}header{padding:12px}.name{max-width:100%}}
 @media(max-width:560px){header{gap:8px}header button{padding:6px 9px}.tabs{width:100%}.tab{flex:1}.sp{display:none}}
 </style></head><body>
@@ -197,7 +200,7 @@ const uid=()=>Math.random().toString(36).slice(2,9);
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fmt=n=>Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fd=d=>d?d.split('-').reverse().join('-'):'';
-const TL={purchase:'Purchase',payment:'Payment',debitadj:'Debit Adjustment',creditadj:'Credit Adjustment',return:'RETURN'};
+const TL={purchase:'Purchase',payment:'Payment',debitadj:'Debit Adjustment',creditadj:'Credit Adjustment',return:'Return'};
 const isDr=e=>e.type==='purchase'||e.type==='debitadj';
 let editId=null,page=1,hasForm=false;
 function arm(b,fn){if(b.dataset.a){fn();return}b.dataset.a=1;const t=b.textContent;b.textContent='Click again to confirm';setTimeout(()=>{delete b.dataset.a;b.textContent=t},3000)}
@@ -207,7 +210,15 @@ function bal(sid){return sums(S.entries.filter(e=>e.sid===sid),e=>isDr(e)?e.amou
 function ensure(list,v){v=(v||'').trim();if(v&&!list.some(x=>x.toLowerCase()===v.toLowerCase()))list.push(v);return v}
 function go(n){page=n;$('p1').hidden=n!==1;$('p2').hidden=n!==2;$('t1').classList.toggle('on',n===1);$('t2').classList.toggle('on',n===2);n===1?renderSup():renderCat()}
 function lists(){}
-const OPTS={cat:()=>S.cats,unit:()=>S.units,cur:()=>S.curs,prod:()=>[...new Set(S.entries.map(e=>e.prod).filter(Boolean))]};
+const OPTS={cat:()=>S.cats,unit:()=>S.units,cur:()=>S.curs,prod:()=>{
+    const t=val('ftype'),uniq=l=>[...new Set(l.filter(Boolean))];
+    if(t==='purchase'||t==='return'){
+      const c=val('fcat');if(!c)return [];
+      return uniq(S.entries.filter(e=>(e.type==='purchase'||e.type==='return')&&(e.cat||'NO CATEGORY').toLowerCase()===c.toLowerCase()).map(e=>e.prod));
+    }
+    return uniq(S.entries.map(e=>e.prod));
+  }};
+const needCat=k=>k==='prod'&&['purchase','return'].includes(val('ftype'))&&!val('fcat');
 const NEWL={cat:'category',unit:'unit',cur:'currency',prod:'product'};
 const NEWT={cat:'New Category',unit:'New Unit',prod:'New Product',cur:'New Currency'};
 const FID={cat:'fcat',unit:'funit',prod:'fprod',cur:'fcur'};
@@ -219,7 +230,7 @@ function searchOptions(k){
   if(!input||!box||!dd)return;
   const q=input.value.trim().toLowerCase(),opts=fopts(k);
   const matches=opts.filter(x=>String(x).toLowerCase().includes(q));
-  let html=matches.map(x=>`<div class="o" onmousedown="event.preventDefault()" onclick="chooseOption('${k}',decodeURIComponent('${encodeURIComponent(x)}') )">${esc(x)}</div>`).join('');
+  let html=needCat(k)?'<div class="empty-option">Choose a category first to see its products</div>':matches.map(x=>`<div class="o" onmousedown="event.preventDefault()" onclick="chooseOption('${k}',decodeURIComponent('${encodeURIComponent(x)}') )">${esc(x)}</div>`).join('');
   if(k!=='cat'&&q&&!matches.some(x=>String(x).toLowerCase()===q))html+=`<div class="o nw" onmousedown="event.preventDefault()" onclick="chooseOption('${k}',decodeURIComponent('${encodeURIComponent(input.value.trim())}'),true)">＋ New ${NEWT[k].replace(/^New /,'')} “${esc(input.value.trim())}”</div>`;
   if(!html)html='<div class="empty-option">No matches</div>';
   dd.innerHTML=html;box.classList.add('open');
@@ -261,10 +272,10 @@ function renderSup(){
 <div class="form-head"><b>Entry details</b></div><div class="form-panel" id="entryPanel" ${hasForm?'':'hidden'}>
 <div class="form" id="f">
 <div><label>Date</label><input type="date" id="fdte"></div>
-<div><label>Entry type</label><select id="ftype" onchange="typ()"><option value="purchase">Purchase</option><option value="payment">Payment</option><option value="return">RETURN</option><option value="debitadj">Debit Adjustment</option><option value="creditadj">Credit Adjustment</option></select></div>
+<div><label>Entry type</label><select id="ftype" onchange="typ()"><option value="purchase">Purchase</option><option value="payment">Payment</option><option value="return">Return</option><option value="debitadj">Debit Adjustment</option><option value="creditadj">Credit Adjustment</option></select></div>
 <div><label>Invoice / reference</label><input id="finv"></div>
 <div class="po"><label>Category</label><div class="search-select" id="fcat_box"><input id="fcat_search" placeholder="Search category..." autocomplete="off" oninput="searchOptions('cat')" onfocus="searchOptions('cat')" onkeydown="optionKey(event,'cat')"><div class="dd" id="fcat_dd"></div><select id="fcat" hidden></select></div></div>
-<div class="po"><label>Product</label><div class="search-select" id="fprod_box"><input id="fprod_search" placeholder="Search product..." autocomplete="off" oninput="searchOptions('prod')" onfocus="searchOptions('prod')" onkeydown="optionKey(event,'prod')"><div class="dd" id="fprod_dd"></div><select id="fprod" hidden></select></div></div>
+<div class="po pp"><label>Product</label><div class="search-select" id="fprod_box"><input id="fprod_search" placeholder="Search product..." autocomplete="off" oninput="searchOptions('prod')" onfocus="searchOptions('prod')" onkeydown="optionKey(event,'prod')"><div class="dd" id="fprod_dd"></div><select id="fprod" hidden></select></div></div>
 <div class="po"><label>Quantity</label><input type="number" id="fqty" min="0" step="any" oninput="pv()"></div>
 <div class="po"><label>Unit</label><div class="search-select" id="funit_box"><input id="funit_search" placeholder="Search unit..." autocomplete="off" oninput="searchOptions('unit')" onfocus="searchOptions('unit')" onkeydown="optionKey(event,'unit')"><div class="dd" id="funit_dd"></div><select id="funit" hidden></select></div></div>
 <div class="po"><label>Price before TVA</label><input type="number" id="fprice" min="0" step="any" oninput="pv()"></div>
@@ -291,14 +302,14 @@ function saveEntry(){
     e.cat=val('fcat')||'NO CATEGORY';e.prod=val('fprod');e.qty=+g('fqty');e.unit=ensure(S.units,val('funit'));e.price=+g('fprice');e.tvaPct=+g('ftva')||0;e.transport=+g('ftransport')||0;
     if(!(e.qty>0)||!(e.price>=0)||g('fprice')===''){m.textContent='Enter quantity and price.';return}
     e.sub=e.qty*e.price;e.tva=e.sub*e.tvaPct/100;e.amount=e.sub+e.tva+e.transport
-  }else{e.amount=+g('famt');if(!(e.amount>0)){m.textContent='Enter an amount.';return}}
+  }else{e.prod=val('fprod');e.amount=+g('famt');if(!(e.amount>0)){m.textContent='Enter an amount.';return}}
   const i=S.entries.findIndex(x=>x.id===e.id);i>=0?S.entries[i]=e:S.entries.push(e);
   save();editId=null;hasForm=false;renderSup();
   $('ftype').value=type;typ()
 }
 function editEntry(id){const e=S.entries.find(x=>x.id===id);if(!e)return;editId=id;hasForm=true;renderSup();
   $('fdte').value=e.date;$('ftype').value=e.type;$('finv').value=e.inv||'';setv('cur',e.cur);typ();
-  if(e.type==='purchase'||e.type==='return'){setv('cat',e.cat);setv('prod',e.prod);$('fqty').value=e.qty;setv('unit',e.unit);$('fprice').value=e.price;$('ftva').value=e.tvaPct;$('ftransport').value=e.transport||0;pv()}else $('famt').value=e.amount;
+  if(e.type==='purchase'||e.type==='return'){setv('cat',e.cat);setv('prod',e.prod);$('fqty').value=e.qty;setv('unit',e.unit);$('fprice').value=e.price;$('ftva').value=e.tvaPct;$('ftransport').value=e.transport||0;pv()}else {if(e.prod)setv('prod',e.prod);$('famt').value=e.amount}
   $('fsave').textContent='Update entry';$('fcancel').hidden=false;$('f').scrollIntoView({block:'nearest'})}
 function cancelEdit(){editId=null;hasForm=false;renderSup()}
 function delEntry(id){const e=S.entries.find(x=>x.id===id);if(!e||!confirm('Delete this transaction?'))return;S.entries=S.entries.filter(x=>x.id!==id);save();renderSup2()}
@@ -308,7 +319,7 @@ function renderLedger(){
   const run={};
   const rows=list.map(e=>{run[e.cur]=(run[e.cur]||0)+(isDr(e)?e.amount:-e.amount);const p=e.type==='purchase'||e.type==='return',d=isDr(e);
     const rc=e.type==='payment'?'pay':(['return','debitadj','creditadj'].includes(e.type)?'ret':'');
-    return `<tr class="${rc}"><td>${fd(e.date)}</td><td class="ty"><span class="bd ${e.type==='purchase'?'b-pur':e.type==='payment'?'b-pay':'b-ret'}">${TL[e.type]||e.type}</span></td><td>${esc(e.inv)}</td><td>${esc(e.cat)}</td><td class="pr">${esc(e.prod)}</td><td class="r">${p?fmt(e.qty).replace(/\.00$/,''):''}</td><td class="c mut">${p?esc(e.unit):''}</td><td class="c mut">${esc(e.cur)}</td><td class="r">${p?fmt(e.price):''}</td><td class="r">${p?fmt(e.tva):''}</td><td class="r">${d?fmt(e.amount):''}</td><td class="r cr">${d?'':fmt(e.amount)}</td><td class="r"><b>${fmt(run[e.cur])}</b></td><td><span class="actions"><button class="more" aria-label="Transaction actions" onclick="toggleMenu(event,'m_${e.id}')">＋</button><span class="menu" id="m_${e.id}"><button onclick="editEntry('${e.id}')">Edit</button><button onclick="delEntry('${e.id}')">Delete</button></span></span></td></tr>`}).join('');
+    return `<tr class="${rc}"><td>${fd(e.date)}</td><td class="ty"><span class="bd ${e.type==='purchase'?'b-pur':e.type==='payment'?'b-pay':'b-ret'}">${TL[e.type]||e.type}</span></td><td class="tx">${esc(e.inv)}</td><td class="tx">${esc(e.cat)}</td><td class="pr">${esc(e.prod)}</td><td class="r">${p?fmt(e.qty).replace(/\.00$/,''):''}</td><td class="c mut">${p?esc(e.unit):''}</td><td class="c mut">${esc(e.cur)}</td><td class="r">${p?fmt(e.price):''}</td><td class="r">${p?fmt(e.tva):''}</td><td class="r">${d?fmt(e.amount):''}</td><td class="r cr">${d?'':fmt(e.amount)}</td><td class="r"><b>${fmt(run[e.cur])}</b></td><td><span class="actions"><button class="more" aria-label="Transaction actions" onclick="toggleMenu(event,'m_${e.id}')">＋</button><span class="menu" id="m_${e.id}"><button onclick="editEntry('${e.id}')">Edit</button><button onclick="delEntry('${e.id}')">Delete</button></span></span></td></tr>`}).join('');
   $('led').innerHTML=list.length?`<table><thead><tr><th>Date</th><th>Type</th><th>Invoice / ref</th><th>Category</th><th>Product</th><th class="r">Quantity</th><th class="c">Unit</th><th class="c">Cur</th><th class="r">Price</th><th class="r">TVA</th><th class="r">Debit</th><th class="r">Payment / credit</th><th class="r">Balance</th><th></th></tr></thead><tbody>${rows}</tbody></table>`:'<div class="empty">No entries yet. Fill the form above and save the first one.</div>';
   const b=$('bal');if(b){const x=bal(S.sel);b.innerHTML=cs(x);b.className=Object.keys(x).some(c=>Math.abs(x[c])>0.004)?'':'z'}
 }
