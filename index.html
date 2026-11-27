@@ -16,7 +16,7 @@ h1{font-size:18px;margin:0 12px 0 0}
 .tab.on,button.pri{background:var(--acc);color:var(--on);border-color:var(--acc);font-weight:600}
 button.del{color:var(--warn)}
 .sp{flex:1}
-main{display:grid;grid-template-columns:minmax(230px,300px) minmax(0,1fr);gap:16px;padding:16px 20px;align-items:start;max-width:1800px;margin:0 auto;width:100%}
+main{display:grid;grid-template-columns:minmax(210px,250px) minmax(0,1fr);gap:16px;padding:16px 20px;align-items:start;max-width:1800px;margin:0 auto;width:100%}
 .card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px}
 .item{display:flex;justify-content:space-between;gap:8px;padding:9px 10px;border:1px solid var(--line);border-radius:6px;margin-bottom:7px;cursor:pointer;background:var(--in)}
 .item.on{border-color:var(--acc);box-shadow:inset 3px 0 0 var(--acc)}
@@ -39,16 +39,16 @@ label{display:block;color:var(--mut);font-size:12px;margin-bottom:3px}
 .msg{color:var(--warn);margin:6px 0 0;min-height:18px}
 .wrap{container-type:inline-size;overflow-x:auto;margin-top:14px;border:1px solid var(--line);border-radius:8px;background:var(--card)}
 table{border-collapse:collapse;width:100%}
-th{color:var(--mut);background:var(--head);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.05em;text-align:left;padding:11px 10px;border-bottom:2px solid var(--acc);white-space:nowrap;vertical-align:middle}
-td{padding:10px;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:middle}
+th{color:var(--mut);background:var(--head);font-weight:700;font-size:.82em;text-transform:uppercase;letter-spacing:.04em;text-align:left;padding:.95em .6em;border-bottom:2px solid var(--acc);white-space:nowrap;vertical-align:middle}
+td{padding:.78em .6em;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:middle}
 tbody tr:last-child td{border-bottom:0}
 tbody tr.pay td{background:var(--payBg)}tbody tr.ret td{background:var(--retBg)}
 tbody tr:hover td{background-image:linear-gradient(rgba(47,109,181,.07),rgba(47,109,181,.07))}
-.bd{display:inline-block;padding:2px 10px;border-radius:999px;font-size:11.5px;font-weight:600;letter-spacing:.01em;white-space:nowrap}
+.bd{display:inline-block;padding:.15em .75em;border-radius:999px;font-size:.92em;font-weight:600;letter-spacing:.01em;white-space:nowrap}
 .b-pur{background:var(--head);color:var(--acc)}.b-pay{background:rgba(30,123,69,.16);color:var(--payInk)}.b-ret{background:rgba(180,140,0,.2);color:var(--retInk)}
 .cr{color:var(--payInk);font-weight:600}tr.ret .cr{color:var(--retInk)}
 td.pr{font-weight:500}td.c{text-align:center}th.c{text-align:center}
-table{font-size:13px;font-variant-numeric:tabular-nums}
+table{font-size:clamp(10.5px,1.02cqw,13px);font-variant-numeric:tabular-nums}
 .form-head b{font-size:15px}
 .r{text-align:right}th.r{text-align:right}.mut{color:var(--mut)}
 td button{padding:3px 8px;font-size:12px}
@@ -60,10 +60,9 @@ h3{margin:18px 0 6px;font-size:15px}
 .dd .o{padding:8px 10px;cursor:pointer}.dd .o:hover{background:var(--row)}.dd .nw{color:var(--acc);font-weight:600}.search-select{position:relative}.search-select input{width:100%}.search-select .dd{display:none}.search-select.open .dd{display:block}.search-select .dd .empty-option{padding:9px 10px;color:var(--mut)}.filter-search{margin:8px 0 10px}.filter-search input{max-width:100%}
 h2.t{margin:0;font-size:20px}
 .ledbar{display:flex;gap:8px;margin-top:14px;align-items:center}.ledbar input{flex:1}.ledbar button{white-space:nowrap}
-.modal{position:fixed;inset:0;z-index:100;background:rgba(10,20,35,.45);display:flex;align-items:center;justify-content:center;padding:16px}.modal .box{background:var(--card);border:1px solid var(--line);border-radius:10px;width:min(820px,100%);max-height:90vh;overflow:auto;padding:18px;box-shadow:0 20px 50px rgba(0,0,0,.3)}.modal h3{margin:0 0 14px;font-size:16px}.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}.modal .btns{display:flex;justify-content:space-between;gap:8px;margin-top:18px}
+.modal{position:fixed;inset:0;z-index:100;background:rgba(10,20,35,.45);display:flex;align-items:center;justify-content:center;padding:16px}.modal .box{background:var(--card);border:1px solid var(--line);border-radius:10px;width:min(820px,100%);max-height:92vh;overflow:visible;padding:18px;box-shadow:0 20px 50px rgba(0,0,0,.3)}.modal h3{margin:0 0 14px;font-size:16px}.fgrid .dd{max-height:200px}.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}.modal .btns{display:flex;justify-content:space-between;gap:8px;margin-top:18px}
 .themebtn:hover{background:var(--row)}.themebtn{width:34px;height:34px;padding:0;border-radius:50%;font-size:17px;line-height:1;display:inline-flex;align-items:center;justify-content:center;flex:none}
-@container (max-width:1150px){table{font-size:12px}td{padding:8px 6px}th{padding:9px 6px;font-size:10px;letter-spacing:.02em}.bd{padding:2px 7px;font-size:10.5px}}
-@container (max-width:850px){table{font-size:11.5px}td{padding:7px 4px}th{padding:8px 4px}.bd{padding:1px 6px}.more{width:24px;height:24px;font-size:15px}}
+@media(max-height:720px),(max-width:640px){.modal .box{overflow:auto;padding-bottom:150px}}
 @media(max-width:900px){main{grid-template-columns:minmax(0,1fr);padding:12px}header{padding:12px}.name{max-width:100%}}
 @media(max-width:560px){header{gap:8px}header button{padding:6px 9px}.tabs{width:100%}.tab{flex:1}.sp{display:none}}
 </style></head><body>
@@ -288,7 +287,7 @@ function renderSup(){
 <div class="pa"><label>Amount</label><input type="number" id="famt" min="0" step="any"></div>
 <div class="form-actions"><button id="fcancel" onclick="cancelEdit()" hidden>Cancel</button><button class="pri" id="fsave" onclick="saveEntry()">Save entry</button></div>
 </div></div><p class="pre" id="pre" ${hasForm?'':'hidden'}></p><p class="msg" id="msg" ${hasForm?'':'hidden'}></p>
-<div class="ledbar"><input id="ledSearch" placeholder="Search date, type, invoice, category, product, unit, amount..." value="${esc(window.ledQuery||'')}" oninput="window.ledQuery=this.value;renderLedger()"><button id="filtBtn" onclick="openFilter()">Filter</button><button id="ledClear" onclick="ledClear()" hidden>Clear</button></div><div class="wrap" id="led" style="margin-top:10px"></div>`;
+<div class="ledbar"><input id="ledSearch" placeholder="Search date, type, invoice, category, product, unit, amount..." value="${esc(window.ledQuery||'')}" oninput="window.ledQuery=this.value;renderLedger()"><button class="pri" id="filtBtn" onclick="openFilter()"></button><button id="ledClear" onclick="ledClear()" hidden>Clear</button></div><div class="wrap" id="led" style="margin-top:10px"></div>`;
   ['cat','unit','prod','cur'].forEach(fill);$('fdte').value=new Date().toISOString().slice(0,10);typ();renderLedger();renderSupList();
 }
 function toggleEntry(){hasForm=!hasForm;$('entryPanel').hidden=!hasForm;['formHead','pre','msg'].forEach(i=>{const x=$(i);if(x)x.hidden=!hasForm});const b=document.querySelector('.top .pri');if(b)b.textContent=hasForm?'− Close Entry':'＋ Add Entry';if(hasForm)$('fdte').focus()}
@@ -346,7 +345,7 @@ function renderLedger(){
     return `<tr class="${rc}"><td>${fd(e.date)}</td><td class="ty"><span class="bd ${e.type==='purchase'?'b-pur':e.type==='payment'?'b-pay':'b-ret'}">${TL[e.type]||e.type}</span></td><td>${esc(e.inv)}</td><td>${esc(e.cat)}</td><td class="pr">${esc(r.prod)}</td><td class="r">${r.c[5]}</td><td class="c mut">${esc(r.c[6])}</td><td class="c mut">${esc(e.cur)}</td><td class="r">${r.c[8]}</td><td class="r">${r.c[9]}</td><td class="r">${r.c[10]}</td><td class="r cr">${r.c[11]}</td><td class="r"><b>${r.c[12]}</b></td><td><span class="actions"><button class="more" aria-label="Transaction actions" onclick="toggleMenu(event,'m_${e.id}')">＋</button><span class="menu" id="m_${e.id}"><button onclick="editEntry('${e.id}')">Edit</button><button onclick="delEntry('${e.id}')">Delete</button></span></span></td></tr>`}).join('');
   $('led').innerHTML=shown.length?`<table><thead><tr><th>Date</th><th>Type</th><th>Invoice / ref</th><th>Category</th><th>Product</th><th class="r">Quantity</th><th class="c">Unit</th><th class="c">Cur</th><th class="r">Price</th><th class="r">TVA</th><th class="r">Debit</th><th class="r">Payment / credit</th><th class="r">Balance</th><th></th></tr></thead><tbody>${rows}</tbody></table>`:(recs.length?'<div class="empty">No entries match your search or filters.</div>':'<div class="empty">No entries yet. Click “Add Entry” to save the first one.</div>');
   const n=ledActive(),fb=$('filtBtn'),cb=$('ledClear');
-  if(fb){fb.textContent='Filter'+(n?` (${n})`:'');fb.className=n?'pri':''}
+  if(fb)fb.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" style="vertical-align:-1px;margin-right:6px"><path d="M3 4h18l-7 8.5V19l-4 2v-8.5z" fill="currentColor"/></svg>Filter'+(n?` (${n})`:'')
   if(cb)cb.hidden=!(n||q);
   const b=$('bal');if(b){const x=bal(S.sel);b.innerHTML=cs(x);b.className=Object.keys(x).some(c=>Math.abs(x[c])>0.004)?'':'z'}
 }
@@ -354,12 +353,23 @@ function ledClear(){window.ledQuery='';window.ledF={};const i=$('ledSearch');if(
 function setLedF(i,v){window.ledF[i]=v;renderLedger()}
 function clearLedF(){window.ledF={};document.querySelectorAll('#fmodal input').forEach(x=>x.value='');renderLedger()}
 function closeFilter(){const m=$('fmodal');if(m)m.remove()}
+function fsearch(i){
+  const box=$('fsel'+i),dd=$('fdd'+i),q=$('fin'+i).value.trim().toLowerCase();
+  const m=window.ledOpts[i].filter(v=>v.toLowerCase().includes(q));
+  window.ledMatch[i]=m;
+  dd.innerHTML=m.length?m.map((v,k)=>`<div class="o" onmousedown="event.preventDefault()" onclick="fpick(${i},${k})">${esc(v)}</div>`).join(''):'<div class="empty-option">No matches</div>';
+  document.querySelectorAll('#fmodal .search-select.open').forEach(x=>{if(x!==box)x.classList.remove('open')});
+  box.classList.add('open');
+}
+function ftype(i){setLedF(i,$('fin'+i).value);fsearch(i)}
+function fpick(i,k){const v=window.ledMatch[i][k];$('fin'+i).value=v;setLedF(i,v);$('fsel'+i).classList.remove('open')}
 function openFilter(){
   closeFilter();
   const recs=ledRecs();
-  const opts=LEDC.map((_,i)=>{const seen=[];recs.forEach(r=>{const v=String(r.c[i]);if(v&&!seen.includes(v))seen.push(v)});if(i!==0&&i!==12)seen.sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));return seen});
+  window.ledMatch=[];
+  window.ledOpts=LEDC.map((_,i)=>{const seen=[];recs.forEach(r=>{const v=String(r.c[i]);if(v&&!seen.includes(v))seen.push(v)});if(i!==0&&i!==12)seen.sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));return seen});
   const m=document.createElement('div');m.className='modal';m.id='fmodal';m.onclick=ev=>{if(ev.target===m)closeFilter()};
-  m.innerHTML=`<div class="box"><h3>Filter entries</h3><div class="fgrid">${LEDC.map((n,i)=>`<div><label>${n}</label><input list="fdl${i}" value="${esc(window.ledF[i]||'')}" oninput="setLedF(${i},this.value)" autocomplete="off" placeholder="All"><datalist id="fdl${i}">${opts[i].map(v=>`<option value="${esc(v)}"></option>`).join('')}</datalist></div>`).join('')}</div><div class="btns"><button onclick="clearLedF()">Clear filters</button><button class="pri" onclick="closeFilter()">Done</button></div></div>`;
+  m.innerHTML=`<div class="box"><h3>Filter entries</h3><div class="fgrid">${LEDC.map((n,i)=>`<div><label>${n}</label><div class="search-select" id="fsel${i}"><input id="fin${i}" value="${esc(window.ledF[i]||'')}" placeholder="All" autocomplete="off" oninput="ftype(${i})" onfocus="fsearch(${i})"><div class="dd" id="fdd${i}"></div></div></div>`).join('')}</div><div class="btns"><button onclick="clearLedF()">Clear filters</button><button class="pri" onclick="closeFilter()">Done</button></div></div>`;
   document.body.appendChild(m);
 }
 document.addEventListener('keydown',ev=>{if(ev.key==='Escape')closeFilter()});
